@@ -1,0 +1,17 @@
+{
+  "_comment": "Рабочие часы студии в GitHub Actions (ADR-0007). Вне часов сессия не стартует, а начатая работа встаёт на паузу на границе шага и продолжается в следующую рабочую сессию. Ночью модели не вызываются и деньги не тратятся. Меняется владельцем: время — по часовому поясу timezone, end не включается.",
+  "timezone": "Europe/Kyiv",
+  "workHours": { "start": "08:00", "end": "23:00" },
+  "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+  "session": {
+    "maxMinutes": 50,
+    "stopBeforeCloseMinutes": 5,
+    "saveEveryMinutes": 5,
+    "telegramPollSeconds": 25,
+    "finishStepGraceMinutes": 15
+  },
+  "retention": {
+    "closedArtifactsDays": 3,
+    "telegramSeenDays": 7
+  }
+}

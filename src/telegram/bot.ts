@@ -40,6 +40,8 @@ export class OwnerBot {
   private ownerId: number;
   private chatId: number;
   scheduler: Scheduler;
+  /** Строка о рабочих часах для /status (сессия в GitHub Actions задаёт её сама). */
+  statusNote: (() => string) | null = null;
 
   constructor(opts: { api: TelegramApi; studio: Studio; store: Store; clock: Clock; ownerId: number; chatId?: number; scheduler: Scheduler }) {
     this.api = opts.api;
@@ -151,7 +153,9 @@ export class OwnerBot {
         return;
       case '/status': {
         const open = (await this.studio.list()).filter((i) => !['approved', 'rejected', 'declined'].includes(i.status));
-        await this.api.sendMessage(this.chatId, open.length ? open.map((i) => `• ${i.title} — ${STATUS[i.status] ?? i.status}${i.version ? `, v${i.version}` : ''}${i.pauseReason ? ` (${truncate(i.pauseReason, 80)})` : ''}\n  ${i.id}`).join('\n') : 'Сейчас ничего не в работе.');
+        const list = open.length ? open.map((i) => `• ${i.title} — ${i.pauseKind === 'schedule' ? 'ждёт рабочих часов' : STATUS[i.status] ?? i.status}${i.version ? `, v${i.version}` : ''}${i.pauseReason && i.pauseKind !== 'schedule' ? ` (${truncate(i.pauseReason, 80)})` : ''}\n  ${i.id}`).join('\n') : 'Сейчас ничего не в работе.';
+        const paused = this.scheduler.paused ? '\n⏸ Новая работа не запускается (/resume — снова запускать).' : '';
+        await this.api.sendMessage(this.chatId, `${list}${paused}${this.statusNote ? `\n\n${this.statusNote()}` : ''}`);
         return;
       }
       case '/budget': {
@@ -174,11 +178,14 @@ export class OwnerBot {
       }
       case '/pause':
         this.scheduler.paused = true;
+        // Флаг переживает перезапуск: сессии в GitHub Actions читают его при старте.
+        await this.store.put('control', 'studio', { paused: true, ts: this.clock.now() });
         await this.api.sendMessage(this.chatId, '⏸ Новая работа не запускается. /resume — снова запускать.');
         return;
       case '/resume':
         if (!arg) {
           this.scheduler.paused = false;
+          await this.store.put('control', 'studio', { paused: false, ts: this.clock.now() });
           const paused = (await this.studio.list()).filter((i) => ['paused', 'running', 'failed'].includes(i.status));
           for (const i of paused) this.scheduler.schedule(i.id);
           await this.api.sendMessage(this.chatId, `▶️ Работа возобновлена${paused.length ? `: ${paused.length} инициатив(ы) продолжаются` : ''}.`);
@@ -200,6 +207,10 @@ export class OwnerBot {
         return;
       }
       if (initiative.status === 'declined') return;
+      if (initiative.pauseKind === 'schedule') {
+        await this.api.sendMessage(this.chatId, `Принял: «${initiative.title}». Сейчас нерабочее время студии — начну в рабочие часы и пришлю готовый результат.`);
+        return;
+      }
       await this.api.sendMessage(this.chatId, `Принял: «${initiative.title}». Команда работает; пришлю готовый результат, без черновиков.`);
       this.scheduler.schedule(initiative.id);
     } catch (err) {
@@ -334,7 +345,7 @@ export function approvalKeyboard(approvalId: string): Keyboard {
 
 const STATUS: Record<string, string> = { running: 'в работе', awaiting_owner: 'ждёт вашего решения', paused: 'на паузе', blocked: 'не прошло внутренний контроль', failed: 'сбой', approved: 'утверждено', rejected: 'отклонено', declined: 'не задача студии' };
 const DECISION: Record<string, string> = { approved: '✅', rejected: '❌', changes_requested: '✏️', superseded: '↪️' };
-const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии' };
+const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', paused_schedule: 'пауза: нерабочее время', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии' };
 
 /** Очередь запусков: инициативы выполняются по одной, после каждой — доставка outbox. */
 export class RunQueue implements Scheduler {
@@ -349,6 +360,11 @@ export class RunQueue implements Scheduler {
   constructor(studio: Studio, outbox: Outbox) {
     this.studio = studio;
     this.outbox = outbox;
+  }
+
+  /** Идёт работа или в очереди есть инициативы. */
+  get active(): boolean {
+    return this.busy || this.queue.length > 0;
   }
 
   schedule(initiativeId: string): void {

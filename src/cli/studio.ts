@@ -9,8 +9,10 @@
 //   check-bedrock                минимальный живой вызов каждой включённой модели
 //   eval [--class c] [--models a,b] [--scripted]  сравнительное тестирование моделей
 //   knowledge-ingest <file.md>   разобрать архив ссылок в knowledge/sources/inbox-*.md
+//   actions-session [--minutes N] [--force] [--no-state] [--scripted]
+//                                сессия в GitHub Actions: рабочие часы, Telegram, состояние (ADR-0007)
 
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { appendFile, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createApp } from '../app.ts';
@@ -26,6 +28,10 @@ import { pollForever } from '../telegram/bot.ts';
 import { BedrockRuntime } from '../llm/bedrock.ts';
 import { GitHubApi } from '../github/publisher.ts';
 import { publishWorkingCopy } from '../github/bootstrap.ts';
+import { systemClock } from '../core/util.ts';
+import { describeHours, loadSchedule, workWindow } from '../runtime/schedule.ts';
+import { StateSync, stateKey, type RestoreReport } from '../runtime/state.ts';
+import { formatSessionSummary, runSession } from '../runtime/session.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 loadDotEnv(join(ROOT, '.env'));
@@ -161,13 +167,85 @@ async function main(): Promise<void> {
       console.log(`Создано: ${out.path} (${out.count} ссылок, тир D до проверки)`);
       return;
     }
+    case 'actions-session':
+      return actionsSession();
     default:
       console.log(readHelp());
   }
 }
 
 function readHelp(): string {
-  return 'Команды: demo | new "<задача>" | status | budget | decide <id> approve|reject|changes "<текст>" | resume <id> | telegram | render <spec.json> | check-bedrock | eval | knowledge-ingest <file.md>';
+  return 'Команды: demo | new "<задача>" | status | budget | decide <id> approve|reject|changes "<текст>" | resume <id> | telegram | render <spec.json> | check-bedrock | eval | knowledge-ingest <file.md> | actions-session';
+}
+
+/** Сводка на странице запуска GitHub Actions (и в консоль). */
+async function summary(md: string): Promise<void> {
+  console.log(md);
+  const file = env('GITHUB_STEP_SUMMARY');
+  if (file) await appendFile(file, md, 'utf8');
+}
+
+/**
+ * Сессия в GitHub Actions (ADR-0007). Ночью и без секретов — выход с кодом 0 и понятной
+ * сводкой, без вызовов моделей. Иначе: состояние из ветки studio-state → работа до конца
+ * сессии или рабочего дня → сохранение состояния.
+ */
+async function actionsSession(): Promise<void> {
+  const schedule = await loadSchedule(ROOT);
+  const force = flag('force') || env('STUDIO_FORCE') === 'true';
+  const minutes = Number(opt('minutes') ?? env('STUDIO_MINUTES', String(schedule.session.maxMinutes)));
+  if (!(minutes > 0 && minutes <= 330)) throw new Error('Длительность сессии — от 1 до 330 минут');
+  const scripted = flag('scripted');
+  const useState = !flag('no-state');
+
+  const window = workWindow(systemClock.now(), schedule);
+  if (!window.open && !force) {
+    await summary(formatSessionSummary({
+      status: 'night', local: window.local, minutesToOpen: window.minutesToOpen, hours: describeHours(schedule), stoppedBy: null, paused: false,
+      updates: 0, resumed: [], task: null, initiatives: [], budget: null, saves: 0, errors: [],
+    }));
+    return;
+  }
+
+  const missing: string[] = [];
+  if (!scripted && !env('AWS_BEARER_TOKEN_BEDROCK')) missing.push('AWS_BEARER_TOKEN_BEDROCK (ключ Bedrock)');
+  if (useState && !env('STUDIO_STATE_KEY')) missing.push('STUDIO_STATE_KEY (ключ шифрования состояния)');
+  if (missing.length) {
+    await summary(`## Студия DRIVE&KAVA\n\n⏳ Студия не запущена: не заданы секреты репозитория — ${missing.join(', ')}. Как добавить — docs/SETUP.md, раздел «GitHub Actions».\n`);
+    return;
+  }
+  if (!env('TELEGRAM_BOT_TOKEN') || !env('TELEGRAM_OWNER_ID')) console.log('Telegram не подключён: сессия выполнит начатую работу и задачу из ручного запуска, сообщения владельцу — в журнал.');
+  if (!env('GITHUB_REPO') && env('GITHUB_REPOSITORY')) process.env.GITHUB_REPO = env('GITHUB_REPOSITORY');
+
+  const state = useState
+    ? new StateSync({ repoRoot: ROOT, dataDir: join(ROOT, '.studio-data'), key: stateKey(env('STUDIO_STATE_KEY')), clock: systemClock, retention: schedule.retention })
+    : null;
+  let restored: RestoreReport | null = null;
+  if (state) {
+    restored = await state.restore();
+    console.log(restored.restored ? `Состояние восстановлено: ${restored.files} файлов, коммит ${restored.commit?.slice(0, 7)}` : 'Состояния ещё нет — первая сессия.');
+  }
+  const extra: string[] = [];
+  if (restored?.overlaySkipped.length) extra.push('', `Файлы студии, изменённые в main за это время (оставлена версия main): ${restored.overlaySkipped.join(', ')}.`);
+
+  const app = await createApp({ repoRoot: ROOT, mode: scripted ? 'scripted' : undefined, quiet: true });
+  try {
+    const report = await runSession({
+      app, schedule, clock: systemClock, maxMs: minutes * 60_000, force,
+      save: state ? (reason) => state.save(reason) : undefined,
+      task: env('STUDIO_TASK') || undefined,
+      log: (line) => console.log(line),
+    });
+    await summary(formatSessionSummary(report, extra));
+  } catch (err) {
+    // Сбой посреди сессии: сохранить то, что уже сделано и оплачено.
+    if (state) await state.save('error').catch((e) => console.error(`Состояние не сохранено: ${(e as Error).message}`));
+    throw err;
+  } finally {
+    await app.close();
+  }
+  // Незавершённые сетевые вызовы не должны держать задание до таймаута: состояние уже сохранено.
+  process.exit(process.exitCode ?? 0);
 }
 
 /** Демо полного цикла в копии репозитория: рабочая копия не меняется. */

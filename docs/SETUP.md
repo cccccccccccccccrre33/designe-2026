@@ -1,63 +1,99 @@
-# Что нужно, чтобы система заработала вживую
+# Что нужно, чтобы студия заработала вживую
 
-Ниже — блокирующие факторы на 15.10.2026, в порядке важности. Ни одна из этих
-интеграций пока не проверялась вживую.
+Студия работает в **GitHub Actions** этого репозитория, только днём (ADR-0007). Ниже —
+что настроить один раз. Пока секретов нет, запуски по расписанию честно пишут
+«студия не запущена: нет секретов» и ничего не тратят.
 
-## 1. Репозиторий designe-2026 (блокирует публикацию кода)
+## 1. Секреты репозитория (обязательно)
 
-`https://github.com/cccccccccccccccrre33/designe-2026` возвращает 404 для
-неавторизованного запроса: он либо приватный, либо ещё не создан.
+Settings → Secrets and variables → Actions → New repository secret, или командами
+ниже в терминале с установленным `gh` (значение вводится скрыто, в чат его не
+присылать):
 
-Нужно:
-- создать репозиторий (можно пустым, приватным);
-- на компьютере установить Git for Windows и GitHub CLI, выполнить `gh auth login`
-  — тогда код можно запушить в ветку и открыть PR;
-- для бота: fine-grained personal access token **только на designe-2026** с
-  правами Contents (read/write), Pull requests (read/write), Issues
-  (read/write). Положить в `.env` как `GITHUB_TOKEN` (файл не коммитится),
-  в облаке — в Secrets Manager.
-- включить защиту ветки `main` (запрет прямого push, обязательный review от
-  владельца) — файл `.github/CODEOWNERS` уже готов.
+| Секрет | Что это | Где взять |
+|---|---|---|
+| `STUDIO_STATE_KEY` | Ключ шифрования состояния студии в ветке `studio-state` | Сгенерировать командой ниже. Не терять: без него состояние не прочитать |
+| `AWS_BEARER_TOKEN_BEDROCK` | Ключ Bedrock — без него модели не вызываются | Консоль Bedrock → API keys |
+| `TELEGRAM_BOT_TOKEN` | Токен бота | @BotFather → `/newbot` |
+| `TELEGRAM_OWNER_ID` | Ваш числовой id в Telegram — бот отвечает только ему | например, @userinfobot |
 
-## 2. Bedrock (блокирует живую работу агентов)
+Ключ состояния — сгенерировать и сразу сохранить в секрет, не показывая на экране:
+
+```bash
+node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))" | gh secret set STUDIO_STATE_KEY --repo cccccccccccccccrre33/designe-2026
+```
+
+Остальные секреты — по одному, команда спросит значение:
+
+```bash
+gh secret set AWS_BEARER_TOKEN_BEDROCK --repo cccccccccccccccrre33/designe-2026
+```
+
+```bash
+gh secret set TELEGRAM_BOT_TOKEN --repo cccccccccccccccrre33/designe-2026
+```
+
+```bash
+gh secret set TELEGRAM_OWNER_ID --repo cccccccccccccccrre33/designe-2026
+```
+
+## 2. Разрешить студии открывать PR (обязательно)
+
+Settings → Actions → General → Workflow permissions → включить **Allow GitHub
+Actions to create and approve pull requests**. Без этого студия не сможет
+публиковать версии дизайна в PR (запись решений и состояния работает и так).
+
+## 3. Управление
+
+| Что сделать | Как |
+|---|---|
+| Запустить сейчас | Actions → «Студия» → Run workflow. Можно сразу написать задачу; галочка «работать в нерабочее время» — только для этого запуска |
+| Дать задачу из терминала | `gh workflow run studio.yml -f task="Главный экран: долго ищу напиток"` |
+| Пауза новой работы | `/pause` в Telegram, `/resume` — снова запускать |
+| Выключить совсем | Settings → Secrets and variables → Actions → Variables → `STUDIO_ENABLED` = `off` (или Actions → «Студия» → Disable workflow) |
+| Поменять рабочие часы | `studio/policies/schedule.json`: `workHours`, `days`, `timezone` |
+| Поменять лимиты денег | `studio/policies/budget.json` (день, месяц, на задачу) |
+| Посмотреть, что сделано | Actions → «Студия» → запуск → сводка; `/status` и `/budget` в Telegram |
+
+Необязательные переменные (Variables): `BEDROCK_REGION` (по умолчанию us-west-2),
+`STUDIO_IMAGES=on` — генерировать фото напитков через Stability (тратит бюджет).
+
+## 4. Как это работает
+
+- Сессия запускается каждый час в :07 и работает до 50 минут; часы проверяются по
+  Киеву, поэтому ночные запуски выходят сразу.
+- За 5 минут до конца рабочего дня новые шаги не начинаются; начатая задача
+  продолжится утром с того же места, сделанное второй раз не оплачивается.
+- Бот отвечает, пока идёт сессия. Сообщения, пришедшие между сессиями или ночью,
+  обрабатываются в следующей сессии (Telegram хранит их 24 часа).
+- Состояние студии — в ветке `studio-state`, зашифровано; её не редактировать.
+- Расписание включается после слияния workflow в `main`. Если в репозитории 60 дней
+  нет активности, GitHub выключит расписание и пришлёт письмо — включить кнопкой
+  во вкладке Actions.
+- Репозиторий публичный — поэтому минуты Actions бесплатны. Если сделать его
+  приватным, бесплатных 2000 минут в месяц на работу весь день не хватит.
+
+## 5. Bedrock
 
 - Регион: `us-west-2` (Stable Image Core/Ultra есть только там).
 - Включить доступ к моделям в консоли Bedrock → Model access: GLM 4.7 Flash,
   MiniMax M2.5, Kimi K2.5, DeepSeek V3.2, Nova 2 Lite, Claude Haiku 4.5,
   Claude Sonnet 4.6, Stable Image Core и Ultra, Stable Image Inpaint,
-  Remove Background, Conservative Upscale. Затем `npm run check:bedrock` покажет, какие модели реально отвечают (ID некоторых моделей помечены в `models.json` как требующие проверки).
-- Для локального запуска достаточно **Bedrock API-ключа** (`AWS_BEARER_TOKEN_BEDROCK`
-  в `.env`).
+  Remove Background, Conservative Upscale. Затем `npm run check:bedrock` (локально,
+  ключ в `.env`) покажет, какие модели реально отвечают.
 - Сверить цены в `studio/policies/models.json` со страницей цен Bedrock; модели
   без цены система не вызывает.
 
-## 3. Telegram (блокирует канал утверждения)
+## 6. Локальный запуск (по желанию)
 
-1. @BotFather → `/newbot` → токен → `.env` как `TELEGRAM_BOT_TOKEN`.
-2. Написать боту любое сообщение.
-3. Узнать свой числовой user id (например, у @userinfobot) → `TELEGRAM_OWNER_ID`.
-   Бот отвечает только этому id.
+Всё то же можно запускать на своём компьютере: скопировать `.env.example` в `.env`,
+вписать ключи, затем `npm run telegram` (бот) или `npm run studio -- new "<задача>"`.
+Одновременно с GitHub Actions локальный бот не запускать: Telegram отдаёт сообщения
+только одному получателю.
 
-Локально бот работает в режиме long polling: `npm run telegram`.
+## 7. Материалы, которых не хватает
 
-## 4. AWS-аккаунт для облачного режима (этап 5)
-
-API-ключ Bedrock не даёт доступа к DynamoDB, S3, Step Functions и AgentCore.
-Нужно:
-- IAM Identity Center или IAM-роль для развёртывания (не ключи root);
-- для CI — роль с доверием GitHub OIDC на репозиторий designe-2026;
-- AWS Budgets на аккаунт с порогами 50/80/95%.
-
-## 5. Рабочее окружение на этом компьютере
-
-Сейчас установлены: Node.js 24, Microsoft Edge и Google Chrome (используются
-рендерером). Не установлены: Git, Python, AWS CLI, Docker. Для работы системы
-локально достаточно Node.js; для публикации кода нужен Git.
-
-## 6. Материалы, которых не хватает
-
-- Markdown-архив ссылок из исследования (упомянут в тексте исследования, к
-  сообщению не приложен) → `npm run knowledge:ingest -- <файл>`.
 - Скриншоты текущего приложения по экранам (главная, каталог, карточка,
   кастомайзер, корзина, активный заказ, профиль) → `product/current/`.
   Частично есть в `D:\DriveKava\Drive_Kava_v81_drinkit\screenshots`.
+- Дневное фото окна — сверить цвета павильона, измеренные по вечернему фото.

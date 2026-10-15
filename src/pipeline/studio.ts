@@ -12,7 +12,7 @@ import {
 } from '../agents/schemas.ts';
 import type { BudgetLedger } from '../budget/ledger.ts';
 import type { Casting, CastingType, CatalogItem, Rubric } from '../config/load.ts';
-import { BudgetExceeded, ModelChainExhausted } from '../core/errors.ts';
+import { BudgetExceeded, ModelChainExhausted, StopRequested } from '../core/errors.ts';
 import type { Schema } from '../core/schema.ts';
 import { mapLimit, newId, round, sha256, truncate, type Clock } from '../core/util.ts';
 import { formatForPrompt, tokenize, type KnowledgeBase } from '../knowledge/base.ts';
@@ -58,6 +58,10 @@ export interface Initiative {
   /** Номер попытки после остановки на финальном gate (новые попытки — новые шаги журнала). */
   attempt: number;
   pauseReason?: string;
+  /** Почему на паузе: schedule — конец рабочих часов (продолжается сама), budget/models — после /resume. */
+  pauseKind?: 'schedule' | 'budget' | 'models';
+  /** false — запрос принят, но ещё не классифицирован (триаж доделает следующий запуск). */
+  triaged?: boolean;
   pendingChanges?: ChangeRequest[];
   approvalId?: string;
   prNumber?: number;
@@ -162,6 +166,8 @@ export class Studio {
   private spaceText: string | null | undefined;
   /** Для тестов: имитировать падение процесса перед шагом с этим ключом. */
   crashBefore: string | null = null;
+  /** Сессия в GitHub Actions: причина не начинать новых шагов (ночь, лимит времени). */
+  stopCheck: (() => string | null) | null = null;
 
   constructor(deps: StudioDeps) {
     this.d = deps;
@@ -194,23 +200,37 @@ export class Studio {
     const id = newId('ini', now);
     const ini: Initiative = {
       id, title: truncate(request, 60), request, source, status: 'running', type: 'screen-redesign', screen: 'home', problem: request,
-      tags: [], round: 0, version: 0, attempt: 0, createdAt: now, updatedAt: now, history: [{ ts: now, event: 'created', detail: source }],
+      tags: [], round: 0, version: 0, attempt: 0, triaged: false, createdAt: now, updatedAt: now, history: [{ ts: now, event: 'created', detail: source }],
     };
     await this.save(ini);
+    try {
+      await this.triage(ini);
+    } catch (err) {
+      // Запрос пришёл в нерабочее время: принят, классифицируется в следующую сессию.
+      if (!(err instanceof StopRequested)) throw err;
+      ini.status = 'paused';
+      ini.pauseKind = 'schedule';
+      ini.pauseReason = err.message;
+      await this.event(ini, 'paused_schedule', err.message);
+    }
+    return { initiative: ini, duplicate: false };
+  }
+
+  private async triage(ini: Initiative): Promise<void> {
     const product = await this.product();
     const triage = await this.journal(ini).step('triage', () => this.callAgent<TriageOut>(ini, this.d.roles.get('studio-director'), 'classify', 'triage', triageSchema, [
-      { label: 'TASK', title: 'Классифицируй запрос владельца', body: `Запрос: «${request}»\nОпредели, задача ли это для дизайн-студии, тип инициативы, экран, проблему пользователя и теги.` },
+      { label: 'TASK', title: 'Классифицируй запрос владельца', body: `Запрос: «${ini.request}»\nОпредели, задача ли это для дизайн-студии, тип инициативы, экран, проблему пользователя и теги.` },
       { label: 'STANDARD', title: 'Продукт', body: product },
     ], { maxTokens: 800 }).then((r) => r.value));
+    ini.triaged = true;
     if (!triage.isDesignTask) {
       ini.status = 'declined';
       await this.event(ini, 'declined', 'не задача студии');
       await this.notifyText(`declined:${ini.id}`, `Это не похоже на задачу для студии, инициатива не создана. Если это задача — опишите экран и проблему.`);
-      return { initiative: ini, duplicate: false };
+      return;
     }
     Object.assign(ini, { type: triage.type, screen: triage.screen, problem: triage.problem, tags: triage.tags, title: triage.title });
     await this.save(ini);
-    return { initiative: ini, duplicate: false };
   }
 
   // ───────────────────────── выполнение ─────────────────────────
@@ -228,18 +248,32 @@ export class Studio {
       if (ini.status === 'blocked') ini.attempt = (ini.attempt ?? 0) + 1;
       ini.status = 'running';
       ini.pauseReason = undefined;
+      ini.pauseKind = undefined;
       await this.save(ini);
+      if (ini.triaged === false) {
+        await this.triage(ini);
+        // triage() меняет статус — сужение типа после присваивания 'running' здесь неверно.
+        if ((ini.status as InitiativeStatus) === 'declined') return ini;
+      }
       if (ini.round === 0) await this.initialRound(ini);
       else await this.feedbackRound(ini);
       return ini;
     } catch (err) {
-      if (err instanceof BudgetExceeded) {
+      if (err instanceof StopRequested) {
+        // Конец рабочих часов или сессии: без сообщения владельцу, продолжит следующая сессия.
         ini.status = 'paused';
+        ini.pauseKind = 'schedule';
+        ini.pauseReason = err.message;
+        await this.event(ini, 'paused_schedule', err.message);
+      } else if (err instanceof BudgetExceeded) {
+        ini.status = 'paused';
+        ini.pauseKind = 'budget';
         ini.pauseReason = err.message;
         await this.event(ini, 'paused_budget', err.message);
         await this.notifyText(`pause:${ini.id}:${ini.round}:${err.scope}`, `⏸ «${ini.title}» на паузе: ${err.message}. Черновик не отправляю. Продолжу после /resume ${ini.id} (например, после изменения лимита).`);
       } else if (err instanceof ModelChainExhausted) {
         ini.status = 'paused';
+        ini.pauseKind = 'models';
         ini.pauseReason = err.message;
         await this.event(ini, 'paused_models', JSON.stringify(err.details).slice(0, 300));
         await this.notifyText(`pause:${ini.id}:${ini.round}:models`, `⏸ «${ini.title}» на паузе: ${err.message}. Модели недоступны или не включены в аккаунте. Продолжу после /resume ${ini.id}.`);
@@ -754,6 +788,7 @@ export class Studio {
 
   private journal(ini: Initiative): StepJournal {
     const j = new StepJournal(this.d.store, this.d.clock, ini.id);
+    j.stopCheck = this.stopCheck;
     if (this.crashBefore) {
       j.crashBefore = this.crashBefore;
       this.crashBefore = null;

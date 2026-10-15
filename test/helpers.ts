@@ -24,6 +24,8 @@ export interface TgCall {
 export class FakeTelegram {
   calls: TgCall[] = [];
   failNext = 0;
+  /** Входящие сообщения владельца: getUpdates отдаёт те, что не ниже offset. */
+  inbox: Array<{ update_id: number }> = [];
   private messageId = 100;
 
   fetch: typeof fetch = async (input, init) => {
@@ -47,7 +49,7 @@ export class FakeTelegram {
     let result: unknown = true;
     if (method === 'sendMessage' || method === 'sendPhoto') result = { message_id: ++this.messageId };
     if (method === 'sendMediaGroup') result = (params.media as unknown[]).map(() => ({ message_id: ++this.messageId }));
-    if (method === 'getUpdates') result = [];
+    if (method === 'getUpdates') result = this.inbox.filter((u) => u.update_id >= Number(params.offset ?? 0));
     return new Response(JSON.stringify({ ok: true, result }), { status: 200 });
   };
 
