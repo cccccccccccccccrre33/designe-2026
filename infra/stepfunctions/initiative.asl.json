@@ -1,0 +1,59 @@
+{
+  "Comment": "ЧЕРНОВИК, НЕ РАЗВЁРНУТ. Конвейер инициативы DRIVE&KAVA Studio в Step Functions Standard. Шаги соответствуют src/pipeline/studio.ts; каждая Lambda вызывает те же функции этапов. Ожидание владельца — waitForTaskToken без таймера, превращающего молчание в согласие.",
+  "StartAt": "Research",
+  "States": {
+    "Research": {
+      "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "research", "initiativeId.$": "$.initiativeId" } },
+      "ResultPath": "$.research", "Retry": [{ "ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 2, "BackoffRate": 2, "IntervalSeconds": 5 }],
+      "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }],
+      "Next": "Positions"
+    },
+    "Positions": {
+      "Type": "Map", "ItemsPath": "$.cast.positions", "MaxConcurrency": 3,
+      "ItemSelector": { "initiativeId.$": "$.initiativeId", "role.$": "$$.Map.Item.Value" },
+      "ItemProcessor": { "ProcessorConfig": { "Mode": "INLINE" }, "StartAt": "Position", "States": { "Position": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "position", "initiativeId.$": "$.initiativeId", "role.$": "$.role" } }, "Retry": [{ "ErrorEquals": ["States.TaskFailed"], "MaxAttempts": 2, "BackoffRate": 2 }], "End": true } } },
+      "ResultPath": "$.positions",
+      "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }],
+      "Next": "Brief"
+    },
+    "Brief": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "brief", "initiativeId.$": "$.initiativeId" } }, "ResultPath": "$.brief", "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }], "Next": "Variants" },
+    "Variants": {
+      "Type": "Map", "ItemsPath": "$.brief.Payload.directions", "MaxConcurrency": 3,
+      "ItemSelector": { "initiativeId.$": "$.initiativeId", "direction.$": "$$.Map.Item.Value" },
+      "ItemProcessor": { "ProcessorConfig": { "Mode": "INLINE" }, "StartAt": "AuthorAndRender", "States": { "AuthorAndRender": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${RenderFn}", "Payload": { "step": "variant", "initiativeId.$": "$.initiativeId", "direction.$": "$.direction" } }, "End": true } } },
+      "ResultPath": "$.variants",
+      "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }],
+      "Next": "CritiqueSelectRefine"
+    },
+    "CritiqueSelectRefine": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${RenderFn}", "Payload": { "step": "critique-select-refine", "initiativeId.$": "$.initiativeId" } }, "ResultPath": "$.gate", "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }], "Next": "GatePassed" },
+    "GatePassed": { "Type": "Choice", "Choices": [{ "Variable": "$.gate.Payload.passed", "BooleanEquals": true, "Next": "Deliver" }], "Default": "Blocked" },
+    "Deliver": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "deliver", "initiativeId.$": "$.initiativeId" } }, "ResultPath": "$.delivery", "Next": "WaitForOwner" },
+    "WaitForOwner": {
+      "Comment": "Токен сохраняется в записи утверждения (DynamoDB). Telegram-вебхук вызывает SendTaskSuccess с решением владельца. Таймаута, ведущего к одобрению, нет.",
+      "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "await-owner", "initiativeId.$": "$.initiativeId", "taskToken.$": "$$.Task.Token" } },
+      "ResultPath": "$.decision", "Next": "Decision"
+    },
+    "Decision": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.decision.action", "StringEquals": "approve", "Next": "RecordApproval" },
+        { "Variable": "$.decision.action", "StringEquals": "reject", "Next": "RecordRejection" },
+        { "Variable": "$.decision.action", "StringEquals": "changes", "Next": "FeedbackRound" }
+      ],
+      "Default": "WaitForOwner"
+    },
+    "FeedbackRound": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${RenderFn}", "Payload": { "step": "feedback-round", "initiativeId.$": "$.initiativeId" } }, "ResultPath": "$.gate", "Catch": [{ "ErrorEquals": ["BudgetExceeded", "ModelChainExhausted"], "ResultPath": "$.pause", "Next": "Paused" }], "Next": "GatePassed" },
+    "RecordApproval": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "record-decision", "initiativeId.$": "$.initiativeId" } }, "End": true },
+    "RecordRejection": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "record-decision", "initiativeId.$": "$.initiativeId" } }, "End": true },
+    "Blocked": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "notify-blocked", "initiativeId.$": "$.initiativeId" } }, "Next": "WaitForResume" },
+    "Paused": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "notify-paused", "initiativeId.$": "$.initiativeId", "pause.$": "$.pause" } }, "Next": "WaitForResume" },
+    "WaitForResume": {
+      "Comment": "/resume в Telegram продолжает с журнала шагов; уже выполненные шаги не исполняются повторно.",
+      "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": { "FunctionName": "${StepFn}", "Payload": { "step": "await-resume", "initiativeId.$": "$.initiativeId", "taskToken.$": "$$.Task.Token" } },
+      "ResultPath": null, "Next": "Research"
+    }
+  }
+}

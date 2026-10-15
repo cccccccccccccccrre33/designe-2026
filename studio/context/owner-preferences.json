@@ -1,0 +1,97 @@
+{
+  "_comment": "Канонический реестр предпочтений владельца. Новое прямое указание переводит противоречащее старое в superseded. Кандидаты из замечаний становятся active после повторения или явного подтверждения. check — ID автопроверки, которая исполняет предпочтение.",
+  "version": 1,
+  "preferences": [
+    {
+      "id": "PREF-001",
+      "statement": "Непрозрачные элементы не закрывают напиток.",
+      "scope": "visual",
+      "strength": "hard",
+      "status": "active",
+      "check": "hero-occlusion",
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Мне не нравится, когда непрозрачные элементы закрывают напиток." }
+    },
+    {
+      "id": "PREF-002",
+      "statement": "Без огромных рекламных баннеров на главной.",
+      "scope": "home",
+      "strength": "hard",
+      "status": "active",
+      "check": "promo-banner-size",
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Я не люблю огромные рекламные баннеры на главной странице." }
+    },
+    {
+      "id": "PREF-003",
+      "statement": "У фотокарточек напитков разные фоны и сцены, не один фон на всех.",
+      "scope": "photo",
+      "strength": "hard",
+      "status": "active",
+      "check": "background-variety",
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Я не хочу одинаковые фоны у всех фотокарточек." }
+    },
+    {
+      "id": "PREF-004",
+      "statement": "Нужна визуальная глубина, но не дешёвая декоративная 3D-графика.",
+      "scope": "visual",
+      "strength": "soft",
+      "status": "active",
+      "check": null,
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Мне нужна визуальная глубина, но не дешёвая декоративная 3D-графика." }
+    },
+    {
+      "id": "PREF-005",
+      "statement": "Интерфейс приложения только на украинском языке.",
+      "scope": "copy",
+      "strength": "hard",
+      "status": "active",
+      "check": "ukrainian-only",
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Весь интерфейс приложения — только на украинском языке." }
+    },
+    {
+      "id": "PREF-006",
+      "statement": "Владельцу показывают только проработанный результат, не черновики и не выбор из идей.",
+      "scope": "process",
+      "strength": "hard",
+      "status": "active",
+      "check": null,
+      "source": { "kind": "owner-brief", "date": "2026-10-15", "quote": "Я ХОЧУ ПОЛУЧАТЬ УЖЕ ПРОРАБОТАННЫЙ ВИЗУАЛЬНЫЙ РЕЗУЛЬТАТ." }
+    },
+    {
+      "id": "PREF-007",
+      "statement": "Сообщения в Telegram короткие, по сути и только когда реально готово; токены не тратятся на пересказы.",
+      "scope": "process",
+      "strength": "hard",
+      "status": "active",
+      "check": null,
+      "source": { "kind": "bld-team-history", "date": "2026-09", "quote": "не тратить токены ещё и на отчёты… коротко по сути и то по делу когда реально готово" }
+    },
+    {
+      "id": "PREF-008",
+      "statement": "В приложении нет оплаты: гость только выбирает, как заплатит на месте, — «Готівкою» или «Карткою». Никаких полей карты, Apple/Google Pay, предоплаты и кнопки «Оплатити».",
+      "scope": "checkout",
+      "strength": "hard",
+      "status": "active",
+      "check": "no-online-payment",
+      "source": { "kind": "owner-chat", "date": "2026-10-15", "quote": "в приложении не будет оплаты пока что… в приложении можно выбрать готівкою либо картой" }
+    },
+    {
+      "id": "PREF-009",
+      "statement": "Окно одно: заказ, оплата и выдача происходят в одном окне. Окно не нумеруется и не делится на кассу и выдачу.",
+      "scope": "pickup",
+      "strength": "hard",
+      "status": "active",
+      "check": "single-window",
+      "source": { "kind": "owner-chat", "date": "2026-10-15", "quote": "как мак драйв только там все происходит в одном окне" }
+    },
+    {
+      "id": "PREF-010",
+      "statement": "Подсказка для тех, кто забирает у окна, опирается на реальное место (product/space/drive-window.md): маршрут, ориентиры, имя или номер заказа, сумма и способ оплаты у окна.",
+      "scope": "pickup",
+      "strength": "hard",
+      "status": "active",
+      "check": null,
+      "source": { "kind": "owner-chat", "date": "2026-10-15", "quote": "смотри вот как выглядет наше окно чтобы ребята учитывали это когда настроивали типа подсказку для тех кто выбрал в окне заберет" }
+    }
+  ],
+  "candidates": []
+}

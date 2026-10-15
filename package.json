@@ -1,0 +1,30 @@
+{
+  "name": "designe-2026",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DRIVE&KAVA AI Studio — автономная продуктовая и дизайн-студия на AWS Bedrock",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "studio": "node src/cli/studio.ts",
+    "demo": "node src/cli/studio.ts demo",
+    "telegram": "node src/cli/studio.ts telegram",
+    "render": "node src/cli/studio.ts render",
+    "eval": "node src/cli/studio.ts eval",
+    "knowledge:ingest": "node src/cli/studio.ts knowledge-ingest",
+    "check:bedrock": "node src/cli/studio.ts check-bedrock",
+    "practitioners:docs": "node src/cli/studio.ts practitioners-docs",
+    "publish:repo": "node src/cli/studio.ts publish-repo"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "playwright-core": "1.64.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "typescript": "7.0.2"
+  }
+}

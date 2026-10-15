@@ -1,0 +1,20 @@
+{
+  "_comment": "Какие инструменты доступны ролям. Системные действия (отправка в Telegram, коммиты, PR, merge) не являются инструментами агентов — их выполняет код конвейера после проверок. На этапе 5 эта таблица переносится в AgentCore Policy (Cedar) на Gateway.",
+  "tools": {
+    "kb.search": "поиск по базе знаний с фильтром тира и статуса",
+    "prefs.read": "чтение реестра предпочтений владельца",
+    "decisions.read": "чтение истории решений",
+    "memory.read": "чтение личных заметок роли",
+    "memory.write_note": "запись заметки роли",
+    "render.screen": "рендер Screen Spec",
+    "checks.run": "автопроверки рендера",
+    "image.generate": "генерация изображения (в пределах бюджета генераций)",
+    "image.edit": "inpaint / erase / upscale",
+    "consult.advisor": "запрос Technical Note у научного совета",
+    "initiative.propose": "предложить инициативу Studio Director",
+    "science.spring": "расчёт пружины",
+    "science.queueing": "модель очереди"
+  },
+  "systemOnly": ["telegram.send", "github.commit", "github.pull_request", "github.merge", "budget.change"],
+  "forbiddenEverywhere": ["app.release", "db.production.write", "repo.delete", "access.grant"]
+}

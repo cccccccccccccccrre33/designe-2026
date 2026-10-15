@@ -1,0 +1,77 @@
+{
+  "_comment": "10 эталонных задач DRIVE&KAVA для выбора модели под класс задачи. Каждая задача имеет объективные проверки; score 0..1. Фикстуры рендерятся на лету — модель видит настоящий экран, а известные проблемы в нём заданы заранее.",
+  "tasks": [
+    {
+      "id": "E01-home-critique",
+      "title": "Анализ главного экрана: найти известные проблемы без подсказки автопроверок",
+      "taskClass": "critique", "role": "ux-quality-reviewer", "output": "critique",
+      "fixture": "variantC",
+      "prompt": "Оцени вариант c главного экрана по рубрике. Найди конкретные проблемы с доказательствами. Автопроверки не проводились — смотри сам.",
+      "checks": [{ "type": "mentions", "patterns": ["контраст|contrast", "окно|вікно|русск|россий"] }]
+    },
+    {
+      "id": "E02-drink-card",
+      "title": "Переработка карточки напитка: корректная Screen Spec на токенах",
+      "taskClass": "spec", "role": "senior-product-designer", "output": "screenVariant",
+      "prompt": "Спроектируй карточку напитка «Раф» (screen=drink-card, spec.id=\"eval-raf\"): размер 250/350 мл, молоко с доплатой, кнопка «Додати · 95 ₴». Напиток — герой.",
+      "checks": [{ "type": "specValid" }, { "type": "ukrainianSpec" }]
+    },
+    {
+      "id": "E03-customizer-ux",
+      "title": "UX-анализ кастомайзера",
+      "taskClass": "position", "role": "ux-quality-reviewer", "output": "position",
+      "prompt": "Кастомайзер напитка: размер, молоко, сироп, сахар, лёд, количество — всё на одном длинном экране. Дай позицию.",
+      "checks": [{ "type": "mentions", "patterns": ["шаг|крок|прогрессивн|по умолчани|за замовчуванням", "одной рук|большого пальца|thumb"] }]
+    },
+    {
+      "id": "E04-compare",
+      "title": "Сравнение двух композиций",
+      "taskClass": "critique", "role": "creative-director", "output": "critique",
+      "fixture": "variantA+variantB",
+      "prompt": "Сравни варианты a и b главного экрана по рубрике. Предпочтения владельца обязательны.",
+      "checks": [{ "type": "preferVariant", "winner": "a" }, { "type": "mentions", "patterns": ["баннер|промо|promo"] }]
+    },
+    {
+      "id": "E05-photo-series",
+      "title": "Критика серии фотокарточек",
+      "taskClass": "position", "role": "beverage-art-director", "output": "position",
+      "prompt": "В каталоге все 28 фотокарточек сняты на одинаковом бежевом фоне с одинаковым светом. Дай позицию арт-директора.",
+      "checks": [{ "type": "mentions", "patterns": ["сцен|фон", "свет|світл", "серия|серії|серій"] }]
+    },
+    {
+      "id": "E06-art-direction",
+      "title": "Художественное направление: разные гипотезы",
+      "taskClass": "brief", "role": "studio-director", "output": "brief",
+      "prompt": "Сформируй бриф для экрана активного заказа (ожидание у окна для авто) с 2–3 направлениями.",
+      "checks": [{ "type": "distinctDirections" }, { "type": "mentions", "patterns": ["интервал|інтервал|хв|мин"] }]
+    },
+    {
+      "id": "E07-transition",
+      "title": "Анализ анимационного перехода",
+      "taskClass": "spec", "role": "motion-designer", "output": "motionSpec",
+      "prompt": "Переход «каталог → карточка напитка» сейчас — затемнение всего экрана 600 мс. Опиши новый переход.",
+      "checks": [{ "type": "springSane" }, { "type": "mentions", "patterns": ["общ|спільн|shared|тот же|той самий"] }]
+    },
+    {
+      "id": "E08-hypothesis",
+      "title": "Проверка продуктовой гипотезы",
+      "taskClass": "position", "role": "product-strategy-lead", "output": "position",
+      "prompt": "Гипотеза: «покажем таймер обратного отсчёта до готовности заказа — гости будут приезжать вовремя». Дай позицию.",
+      "checks": [{ "type": "mentions", "patterns": ["оплат|на месте|на місці", "интервал|неопредел|точност|похибк"] }]
+    },
+    {
+      "id": "E09-tech-note",
+      "title": "Техническая записка: прогноз готовности",
+      "taskClass": "science", "role": "advisor-queueing", "output": "technicalNote",
+      "prompt": "Как рассчитывать время готовности предзаказа, если работает 1–2 бариста, а в очереди 0–8 заказов разной сложности?",
+      "checks": [{ "type": "mentions", "patterns": ["P90|90|квантил|перцентил|percentile", "очеред|черг|queue"] }]
+    },
+    {
+      "id": "E10-feedback",
+      "title": "Классификация замечаний владельца",
+      "taskClass": "extract", "role": "studio-director", "output": "feedback",
+      "prompt": "Замечания к версии v1 экрана «home»:\n«Уберите большую плашку снизу, сделайте кнопки прозрачнее, а сам напиток немного крупнее»\nРазложи на конкретные правки (id c1, c2…).",
+      "checks": [{ "type": "changesCount", "min": 3, "max": 3 }]
+    }
+  ]
+}

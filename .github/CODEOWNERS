@@ -1,0 +1,3 @@
+# Любое изменение в main требует review владельца. Бот вливает только PR
+# с путями studio/ и design-system/ и только после одобрения в Telegram.
+* @cccccccccccccccrre33

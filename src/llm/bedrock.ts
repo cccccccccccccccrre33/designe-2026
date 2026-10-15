@@ -1,0 +1,131 @@
+// Bedrock Runtime через HTTP с Bedrock API-ключом (bearer). Converse — для текста и
+// изображений на входе, InvokeModel — для Stability. Без AWS SDK: в локальном режиме
+// ключа достаточно; облачный режим (IAM, SigV4) подключается на этапе 5.
+//
+// Статус: проверено модульными тестами с подменой HTTP. Живой вызов не выполнялся —
+// нет ключа. Команда `npm run check:bedrock` делает минимальный живой запрос.
+
+import { ProviderError } from '../core/errors.ts';
+import type { ChatRequest, ChatResponse, ImageProvider, ImageRequest, ImageResponse, LlmProvider } from './types.ts';
+
+type FetchLike = typeof fetch;
+
+export interface BedrockOptions {
+  apiKey: string;
+  fetchImpl?: FetchLike;
+  endpoint?: (region: string) => string;
+  timeoutMs?: number;
+}
+
+export class BedrockRuntime implements LlmProvider, ImageProvider {
+  private apiKey: string;
+  private fetchImpl: FetchLike;
+  private endpoint: (region: string) => string;
+  private timeoutMs: number;
+
+  constructor(opts: BedrockOptions) {
+    if (!opts.apiKey) throw new Error('AWS_BEARER_TOKEN_BEDROCK не задан');
+    this.apiKey = opts.apiKey;
+    this.fetchImpl = opts.fetchImpl ?? fetch;
+    this.endpoint = opts.endpoint ?? ((region) => `https://bedrock-runtime.${region}.amazonaws.com`);
+    this.timeoutMs = opts.timeoutMs ?? 180_000;
+  }
+
+  private async post(region: string, path: string, body: unknown): Promise<unknown> {
+    const url = `${this.endpoint(region)}${path}`;
+    let res: Response;
+    try {
+      res = await this.fetchImpl(url, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json',
+          authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err) {
+      throw new ProviderError('retryable', 0, `Сеть недоступна: ${(err as Error).message}`);
+    }
+    const text = await res.text();
+    if (!res.ok) throw mapError(res.status, res.headers.get('x-amzn-errortype') ?? '', text);
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new ProviderError('retryable', res.status, 'Некорректный JSON в ответе Bedrock');
+    }
+  }
+
+  async chat(req: ChatRequest): Promise<ChatResponse> {
+    const content: unknown[] = [{ text: req.user }];
+    for (const img of req.images ?? []) {
+      if (img.label) content.push({ text: `Изображение: ${img.label}` });
+      content.push({ image: { format: img.format, source: { bytes: img.base64 } } });
+    }
+    const messages: unknown[] = [{ role: 'user', content }];
+    if (req.repair) {
+      messages.push({ role: 'assistant', content: [{ text: req.repair.previous.slice(0, 20_000) }] });
+      messages.push({
+        role: 'user',
+        content: [{ text: `Ответ не прошёл проверку схемы:\n- ${req.repair.errors.slice(0, 20).join('\n- ')}\nВерни ТОЛЬКО исправленный JSON целиком, без пояснений.` }],
+      });
+    }
+    const body = {
+      system: [{ text: req.system }],
+      messages,
+      inferenceConfig: { maxTokens: req.maxTokens, temperature: req.temperature ?? 0.4 },
+    };
+    const started = Date.now();
+    const data = (await this.post(req.region, `/model/${encodeURIComponent(req.model.modelId)}/converse`, body)) as ConverseResponse;
+    const blocks = data.output?.message?.content ?? [];
+    const text = blocks.map((b) => (typeof b.text === 'string' ? b.text : '')).join('');
+    return {
+      text,
+      usage: { inputTokens: data.usage?.inputTokens ?? 0, outputTokens: data.usage?.outputTokens ?? 0 },
+      stopReason: data.stopReason,
+      latencyMs: data.metrics?.latencyMs ?? Date.now() - started,
+    };
+  }
+
+  async generate(req: ImageRequest): Promise<ImageResponse> {
+    const body: Record<string, unknown> = {
+      prompt: req.prompt,
+      aspect_ratio: req.aspectRatio,
+      output_format: 'png',
+    };
+    if (req.negativePrompt) body.negative_prompt = req.negativePrompt;
+    if (req.seed !== undefined) body.seed = req.seed;
+    const data = (await this.post(req.region, `/model/${encodeURIComponent(req.model.modelId)}/invoke`, body)) as StabilityResponse;
+    const reason = data.finish_reasons?.[0];
+    if (reason) throw new ProviderError('bad_request', 200, `Изображение отфильтровано: ${reason}`);
+    const image = data.images?.[0];
+    if (!image) throw new ProviderError('retryable', 200, 'Пустой ответ генератора изображений');
+    return { base64: image, seed: data.seeds?.[0] ?? req.seed ?? 0, format: 'png' };
+  }
+}
+
+interface ConverseResponse {
+  output?: { message?: { content?: Array<{ text?: string }> } };
+  usage?: { inputTokens?: number; outputTokens?: number };
+  stopReason?: string;
+  metrics?: { latencyMs?: number };
+}
+
+interface StabilityResponse {
+  images?: string[];
+  seeds?: number[];
+  finish_reasons?: Array<string | null>;
+}
+
+export function mapError(status: number, errorType: string, body: string): ProviderError {
+  const message = `${status} ${errorType} ${body.slice(0, 300)}`.trim();
+  if ([408, 424, 429, 500, 502, 503, 504].includes(status)) return new ProviderError('retryable', status, message);
+  if (status === 404) return new ProviderError('unavailable', status, message);
+  if (status === 401) return new ProviderError('auth', status, message);
+  if (status === 403) {
+    // Нет доступа к конкретной модели — это недоступность модели, а не проблема ключа.
+    return /model|access to the model/i.test(body) ? new ProviderError('unavailable', status, message) : new ProviderError('auth', status, message);
+  }
+  return new ProviderError('bad_request', status, message);
+}

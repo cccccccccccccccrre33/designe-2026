@@ -1,0 +1,6 @@
+node_modules/
+.env
+.studio-data/
+.demo/
+.tmp/
+*.log
