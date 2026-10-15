@@ -18,6 +18,14 @@ Dodo Engineering · Лид Android-дизайн-системы Dodo Pizza, Live 
 Планка: Ошибки дешёвые и пойманы до пользователя.
 Избегать: 28 стилей одной кнопки.
 
+## Сергей Орлов — вкус
+<!-- meta: id=PR-orlov-taste; tier=A; tags=practitioner,dodo-product,orlov,taste; kind=practitioner; rights=public-reference-only; url=https://habr.com/ru/companies/dododev/articles/1074898/ -->
+Ценит:
+- дизайн-система как договорённость дизайна и разработки: паспорта компонентов, скриншотные тесты, без дублей — https://habr.com/ru/companies/dododev/articles/1074898/
+Отвергает:
+- дубли одного компонента в разных фичах — https://habr.com/ru/companies/dododev/articles/1074898/
+Не известно (не выдумывать): инженерные практики не равны художественному вкусу
+
 ## Источники
 - Дизайн-система в Додо: модуль компонентов — ещё не система (Habr) (тир A): https://habr.com/ru/companies/dododev/articles/1074898/
 - Live Updates на Android: где макеты врут (Habr) (тир A): https://habr.com/ru/companies/dododev/articles/969810/

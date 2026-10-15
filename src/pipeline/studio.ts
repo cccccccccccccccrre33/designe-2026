@@ -7,7 +7,7 @@ import { buildSystem, buildUser, type ContextSection } from '../agents/prompt.ts
 import type { PractitionerBook } from '../agents/practitioners.ts';
 import type { RoleBook, RoleProfile } from '../agents/roles.ts';
 import {
-  arbiterSchema, briefSchema, critiqueSchema, feedbackSchema, motionSpecSchema, photoBriefSchema,
+  arbiterSchema, autonomyPlanSchema, briefSchema, critiqueSchema, pitchSchema, feedbackSchema, motionSpecSchema, photoBriefSchema,
   positionSchema, screenVariantSchema, triageSchema,
 } from '../agents/schemas.ts';
 import type { BudgetLedger } from '../budget/ledger.ts';
@@ -349,6 +349,11 @@ export class Studio {
       gate = this.gate(current, lastCritiques);
     }
 
+    // Старшие смотрят до владельца и отправляют на доработку всё, за что было бы неловко.
+    const senior = await j.step(`senior:0:a${a}`, () => this.seniorReview(ini, cast, current, lastCritiques, [], research.sections, brief.problem, `r0-${current.id}-a${a}-s`));
+    current = senior.variant;
+    lastCritiques = senior.critiques;
+
     const finished = await j.step(`finish:0:a${a}`, () => this.finishVisuals(ini, cast, current, brief.problem));
     current = finished.variant;
     gate = this.gate(current, lastCritiques);
@@ -376,6 +381,9 @@ export class Studio {
       critiques = refined.c;
       gate = this.gate(current, critiques, changes);
     }
+    const senior = await j.step(`r${r}:senior:a${a}`, () => this.seniorReview(ini, cast, current, critiques, changes, research.sections, ini.problem, `r${r}-a${a}-s`));
+    current = senior.variant;
+    critiques = senior.critiques;
     const finished = await j.step(`finish:${r}:a${a}`, () => this.finishVisuals(ini, cast, current, ini.problem));
     current = finished.variant;
     gate = this.gate(current, critiques, changes);
@@ -476,7 +484,7 @@ export class Studio {
     };
   }
 
-  private async critique(ini: Initiative, cast: CastingType, variants: VariantResult[], problem: string, sections: ContextSection[], critics: string[] = cast.critics): Promise<Critique[]> {
+  private async critique(ini: Initiative, cast: CastingType, variants: VariantResult[], problem: string, sections: ContextSection[], critics: string[] = cast.critics, mode: 'blind' | 'senior' = 'blind'): Promise<Critique[]> {
     const criteria = this.d.rubric.criteria.map((c) => c.id);
     const images: ImagePart[] = [];
     for (const v of variants) images.push({ format: 'png', base64: (await readFile(v.preview)).toString('base64'), label: `вариант ${v.id} — ${v.name}` });
@@ -486,7 +494,7 @@ export class Studio {
     return mapLimit(critics, this.d.ledger.policy.process.parallelism, async (criticId) => {
       const role = this.d.roles.get(criticId);
       const r = await this.callAgent<{ variants: CritiqueVariant[] }>(ini, role, 'critique', 'critique', critiqueSchema(criteria), [
-        { label: 'TASK', title: 'Слепая критика вариантов', body: `Оцени каждый вариант по рубрике (1–5) со своей профессиональной позиции. Авторы скрыты. Проблема: ${problem}\nДля каждой проблемы укажи узел (nodeId), доказательство и исправление. Вето — только с доказательством.\nКритерий school: приёмы школ (Drinkit, amo, Dodo) применены по делу и узнаваемо, но экраны и бренд-элементы источников не скопированы; сверяйся со своей школой.${place ? '\nПоследнее изображение — фото реального окна DRIVE&KAVA: сверь получение с местом (окно одно, маршрут и ориентиры, оплата у окна готівкою або карткою, читается до выезда).' : ''}\nРубрика: ${this.d.rubric.criteria.map((c) => `${c.id} — ${c.title}`).join('; ')}` },
+        { label: 'TASK', title: mode === 'senior' ? 'Проверка старшим до показа владельцу' : 'Слепая критика вариантов', body: `Оцени каждый вариант по рубрике (1–5) со своей профессиональной позиции. Авторы скрыты. Проблема: ${problem}\nДля каждой проблемы укажи узел (nodeId), доказательство и исправление. Вето — только с доказательством.\nКритерий school: приёмы школ (Drinkit, amo, Dodo) применены по делу и узнаваемо, но экраны и бренд-элементы источников не скопированы; сверяйся со своей школой.${place ? '\nПоследнее изображение — фото реального окна DRIVE&KAVA: сверь получение с местом (окно одно, маршрут и ориентиры, оплата у окна готівкою або карткою, читается до выезда).' : ''}\nРубрика: ${this.d.rubric.criteria.map((c) => `${c.id} — ${c.title}`).join('; ')}` },
         { label: 'FACTS', title: 'Автопроверки (факты, не обсуждаются)', body: variants.map((v) => `Вариант ${v.id} «${v.name}»:\n${v.facts.text}`).join('\n\n') },
         { label: 'WORK', title: 'Обоснования авторов', body: variants.map((v) => `Вариант ${v.id}: ${v.hypothesis}\n${v.rationale}${v.signaturesUsed?.length ? `\nЗаявленные приёмы школ: ${(this.d.practitioners?.credit(v.signaturesUsed) ?? v.signaturesUsed).join('; ')}` : ''}`).join('\n') },
         ...sections.filter((s) => s.label !== 'RESEARCH'),
@@ -498,6 +506,96 @@ export class Studio {
   private criticsWithIssues(critiques: Critique[], variantId: string, cast: CastingType): string[] {
     const flagged = critiques.filter((c) => c.variants.some((v) => v.variantId === variantId && (v.issues.some((i) => i.severity !== 'minor') || v.veto?.active))).map((c) => c.critic);
     return flagged.length ? flagged : cast.critics.slice(0, 1);
+  }
+
+  /**
+   * Старшие (casting.review.seniors) смотрят результат до владельца. Замечания уровня
+   * major/blocking, вето или оценка ниже порога — доработка и повторный взгляд старших
+   * (до maxRounds). Их оценки заменяют оценки тех же ролей в гейте.
+   */
+  private async seniorReview(ini: Initiative, cast: CastingType, v: VariantResult, critiques: Critique[], changes: ChangeRequest[], sections: ContextSection[], problem: string, tag: string): Promise<{ variant: VariantResult; critiques: Critique[]; rounds: number }> {
+    const review = this.d.casting.review;
+    const seniors = (review?.seniors ?? []).filter((r) => this.d.roles.has(r) && r !== cast.author);
+    if (!review || !seniors.length) return { variant: v, critiques, rounds: 0 };
+    let current = v;
+    let senior = await this.critique(ini, cast, [current], problem, sections, seniors, 'senior');
+    let rounds = 0;
+    while (rounds < review.maxRounds && this.seniorsWantChanges(senior, current.id)) {
+      rounds++;
+      current = await this.refine(ini, cast, current, senior, changes, sections, `${tag}${rounds}`);
+      senior = await this.critique(ini, cast, [current], problem, sections, seniors, 'senior');
+    }
+    const issues = senior.flatMap((c) => c.variants.find((x) => x.variantId === current.id)?.issues ?? []).filter((i) => i.severity !== 'minor').length;
+    await this.event(ini, 'senior_review', `${seniors.join(', ')}: доработок ${rounds}, открытых замечаний ${issues}`);
+    return { variant: current, critiques: [...critiques.filter((c) => !seniors.includes(c.critic)), ...senior], rounds };
+  }
+
+  private seniorsWantChanges(critiques: Critique[], variantId: string): boolean {
+    return critiques.some((c) => c.variants.some((x) => x.variantId === variantId && (x.veto?.active || x.issues.some((i) => i.severity !== 'minor') || this.weighted(x.scores) < this.d.rubric.passScore)));
+  }
+
+  /** Кто показывает результат владельцу: старшая роль в манере своей школы. */
+  presenterFor(ini: Pick<Initiative, 'type' | 'source'>): { roleId: string; label: string } | null {
+    const p = this.d.casting.review?.presenter;
+    if (!p) return null;
+    const roleId = [ini.source === 'autonomous' ? p.autonomous : undefined, p.byType?.[ini.type], p.default].find((r): r is string => Boolean(r && this.d.roles.has(r)));
+    if (!roleId) return null;
+    const title = this.d.casting.review?.titles?.[roleId] ?? this.d.roles.get(roleId).title;
+    const names = this.d.practitioners?.primaryNames(roleId) ?? [];
+    // Роль работает в манере школы, но не выдаёт себя за человека: подпись «(AI)».
+    return { roleId, label: `${title} (AI${names.length ? ` · школа: ${names.join(', ')}` : ''})` };
+  }
+
+  private async pitch(ini: Initiative, roleId: string, v: VariantResult, critiques: Critique[], ctx: { name: string; hypothesis: string; changes?: ChangeRequest[] }): Promise<PitchOut> {
+    const strengths = critiques.flatMap((c) => c.variants.find((x) => x.variantId === v.id)?.strengths ?? []).slice(0, 4);
+    const refs = this.d.kb.search(`${ini.problem} ${ini.screen} ${ini.tags.join(' ')}`, { k: 5 });
+    const r = await this.callAgent<PitchOut>(ini, this.d.roles.get(roleId), 'critique', 'pitch', pitchSchema, [
+      { label: 'TASK', title: 'Покажи результат владельцу', body: `Ты показываешь владельцу DRIVE&KAVA готовый экран (изображение приложено). Говори по-русски, коротко, своим профессиональным вкусом — что получилось и почему это сильно. Не льсти, не обещай того, чего нет на экране, не пересказывай проверки. Закончи одним простым вопросом, на который владелец ответит в одну строку.\nЗадача: ${ini.title}. Проблема: ${ini.problem}\nНаправление: ${ctx.name} — ${ctx.hypothesis}${ctx.changes?.length ? `\nЭто доработка по правкам владельца: ${ctx.changes.map((c) => c.request).join('; ')}` : ''}` },
+      { label: 'WORK', title: 'Что отметили коллеги', body: `Обоснование автора: ${v.rationale}\nСильные стороны: ${strengths.join('; ') || '—'}` },
+      { label: 'RESEARCH', title: 'Референсы (выбери до 3 ID, которые стоит открыть владельцу)', body: formatForPrompt(refs) },
+    ], { maxTokens: 700, images: [{ format: 'png', base64: (await readFile(v.preview)).toString('base64'), label: 'готовый экран' }] });
+    const known = new Set(refs.map((h) => h.id));
+    return { ...r.value, references: (r.value.references ?? []).filter((id) => known.has(id)) };
+  }
+
+  /** Ссылки референсов для карточки: только карточки базы знаний с адресом. */
+  private referenceLinks(ids: string[]): Array<{ title: string; url: string }> {
+    return ids.map((id) => this.d.kb.get(id)).filter((c): c is NonNullable<typeof c> => Boolean(c?.url)).map((c) => ({ title: c.title, url: c.url! })).slice(0, 3);
+  }
+
+  // ───────────────────────── самостоятельная работа ─────────────────────────
+
+  /**
+   * Директор студии выбирает следующую задачу к цели, когда владелец ничего не поставил.
+   * Опора: продукт, предпочтения, принципы, что уже утверждено и отклонено, база знаний.
+   */
+  async proposeAutonomous(day: string): Promise<AutonomyPlan> {
+    const recent = (await this.list()).slice(-12);
+    const decisions = await this.d.store.list<{ title: string; decision: string; reason?: string; screen: string }>('decisions');
+    const prefs = await this.d.prefs.active();
+    const hypothesisDrinks = this.d.catalog.filter((c) => c.look?.status === 'hypothesis').map((c) => c.name);
+    const refs = this.d.kb.search('Drinkit amo приложение характер тепло экран заказ окно привычный напиток', { k: 6 });
+    const planner = { id: `autonomy-${day}`, source: 'autonomous' } as Initiative;
+    const r = await this.callAgent<AutonomyPlan>(planner, this.d.roles.get('studio-director'), 'brief', 'autonomyPlan', autonomyPlanSchema, [
+      { label: 'TASK', title: 'Следующая задача студии', body: [
+        'Владелец сейчас ничего не поставил. Цель студии — приложение DRIVE&KAVA уровня Drinkit и amo: тёплое, с характером, быстрое для гостя в машине у окна, по вкусу владельца (предпочтения ниже обязательны).',
+        'Выбери ОДНУ следующую задачу для дизайн-команды: экран или состояние, где сейчас больше всего не хватает до цели. Сформулируй её так, как поставил бы владелец. Не повторяй то, что уже в работе, утверждено или отклонено. Не выпуск, не код, не база данных — только дизайн.',
+        hypothesisDrinks.length ? `Внешний вид этих напитков владелец ещё не подтвердил — не делай их фото финальными: ${hypothesisDrinks.join(', ')}.` : '',
+        'Если стоящей задачи сейчас нет — skip: true и причина.',
+      ].filter(Boolean).join('\n') },
+      { label: 'STANDARD', title: 'Продукт', body: await this.product() },
+      { label: 'OWNER PREFERENCES', title: 'Предпочтения владельца', body: prefs.map((p) => `${p.id} [${p.strength}] ${p.statement}`).join('\n') },
+      { label: 'STANDARD', title: 'Принципы бренда', body: this.d.principles.map((p) => `${p.id} ${p.title}: ${p.rule}`).join('\n') },
+      { label: 'WORK', title: 'Последние задачи студии', body: recent.map((i) => `${i.title} — ${i.screen}, ${i.status}${i.source === 'autonomous' ? ' (сама)' : ''}`).join('\n') || 'пока не было' },
+      { label: 'REJECTED', title: 'Решения владельца', body: decisions.slice(-10).map((d) => `${d.decision === 'approved' ? 'утверждено' : 'отклонено'}: ${d.title}${d.reason ? ` — ${d.reason}` : ''}`).join('\n') || 'пока нет' },
+      { label: 'RESEARCH', title: 'База знаний', body: formatForPrompt(refs) },
+    ], { maxTokens: 900 });
+    const plan = r.value;
+    // Повтор недавней задачи — не новая работа.
+    if (!plan.skip && recent.some((i) => similarity(`${i.request} ${i.problem}`, plan.request) >= 0.6)) {
+      return { ...plan, skip: true, reason: `похоже на недавнюю задачу: ${plan.title}` };
+    }
+    return plan;
   }
 
   private weighted(scores: Record<string, number>): number {
@@ -642,7 +740,9 @@ export class Studio {
     const changed = ctx.changes?.length
       ? (v.addressed ?? []).map((a) => `${a.status === 'done' ? '✓' : a.status === 'declined' ? '✗' : '±'} ${ctx.changes!.find((c) => c.id === a.changeId)?.request ?? a.changeId}${a.status !== 'done' ? ` — ${a.explanation}` : ''}`).join('\n')
       : `${ctx.name}: ${truncate(ctx.hypothesis, 160)}`;
-    const files = await this.versionFiles(ini, v, version, gate, critiques, ctx);
+    const presenter = this.presenterFor(ini);
+    const pitch = presenter ? await this.journal(ini).step(`pitch:${ini.round}`, () => this.pitch(ini, presenter.roleId, v, critiques, ctx)) : null;
+    const files = await this.versionFiles(ini, v, version, gate, critiques, { ...ctx, pitch, presenter: presenter?.label });
     await writeRepoFiles(this.d.repoRoot, files);
     if (this.d.publishToGitHub) {
       await this.d.outbox.enqueue(`gh:publish:${ini.id}:v${version}`, 'github.publish', {
@@ -658,6 +758,9 @@ export class Studio {
       changed,
       why: strengths.length ? strengths.join('; ') : `оценка критиков ${gate.score}/5`,
       schools: this.d.practitioners?.credit(v.signaturesUsed ?? []) ?? [],
+      presenter: presenter && pitch ? { label: presenter.label, headline: pitch.headline, story: pitch.story, question: pitch.question } : null,
+      references: this.referenceLinks(pitch?.references ?? []),
+      autonomous: ini.source === 'autonomous',
       problem: ini.problem,
       status: `рендер экрана${v.states.length ? ` + ${v.states.length} состояния` : ''} · фото: ${v.photo === 'generated' ? 'сгенерированы' : 'заглушки (генерация не подключена)'} · движение: ${ctx.motion ? 'спецификация' : 'нет'}`,
       checks: `${passedChecks}/${v.checks.length}`,
@@ -676,7 +779,7 @@ export class Studio {
     return { approvalId: approval.id };
   }
 
-  private async versionFiles(ini: Initiative, v: VariantResult, version: number, gate: GateResult, critiques: Critique[], ctx: { motion: MotionOut | null; selectionNotes: string[] }): Promise<RepoFile[]> {
+  private async versionFiles(ini: Initiative, v: VariantResult, version: number, gate: GateResult, critiques: Critique[], ctx: { motion: MotionOut | null; selectionNotes: string[]; pitch?: PitchOut | null; presenter?: string }): Promise<RepoFile[]> {
     const base = `studio/initiatives/${ini.id}/v${version}`;
     const review = {
       initiative: ini.id, version, artifactHash: v.hash, gate,
@@ -686,6 +789,7 @@ export class Studio {
     const schools = this.d.practitioners?.credit(v.signaturesUsed ?? []) ?? [];
     const summary = [
       `# ${ini.title} — v${version}`, '',
+      ...(ctx.pitch ? [`> **${ctx.pitch.headline}** — ${ctx.presenter ?? ''}`, `> ${ctx.pitch.story}`, `> Вопрос владельцу: ${ctx.pitch.question}`, ''] : []),
       `Проблема: ${ini.problem}`, '',
       `Направление: ${v.name}. ${v.hypothesis}`, '',
       schools.length ? `Приёмы школ: ${schools.join('; ')}` : 'Приёмы школ: не заявлены.', '',
@@ -882,10 +986,12 @@ interface PositionOut { stance: string; proposals: Array<{ idea: string; why: st
 interface BriefOut { problem: string; successCriteria: string[]; constraints: string[]; directions: Array<{ id: string; name: string; hypothesis: string; artIdea: string; structure: string; risks?: string[] }>; decisions?: string[] }
 interface VariantOut { rationale: string; spec: ScreenSpec; addressed?: VariantResult['addressed']; signaturesUsed?: string[] }
 interface PhotoOut { prompt: string; negativePrompt?: string; aspectRatio: string }
+interface PitchOut { headline: string; story: string; question: string; references?: string[] }
+export interface AutonomyPlan { skip: boolean; reason?: string; title: string; request: string; why: string; references?: string[] }
 export interface MotionOut { transitions: Array<{ from: string; to: string; trigger: string; sharedElements?: string[]; spring: { duration: number; bounce: number }; choreography?: string }>; microinteractions?: Array<{ element: string; trigger: string; feedback: string }>; reducedMotion: string }
 interface FeedbackOut { intent: string; changes: ChangeRequest[]; preferenceCandidates: Array<{ statement: string; scope: string; strength: 'hard' | 'soft' }> }
 
-function similarity(a: string, b: string): number {
+export function similarity(a: string, b: string): number {
   const x = new Set(tokenize(a));
   const y = new Set(tokenize(b));
   if (!x.size || !y.size) return 0;

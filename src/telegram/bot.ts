@@ -1,6 +1,6 @@
 // Бот владельца: пульт управления студией. Принимает только сообщения владельца,
 // игнорирует повторные update_id, привязывает каждое решение к конкретной версии.
-// Сообщения формируются кодом — без LLM-пересказов (PREF-007).
+// Сообщения формируются кодом — без LLM-пересказов (PREF-007). Исключение по просьбе владельца\n// (2026-10-15): карточку результата подаёт ведущий — заголовок, 2–3 предложения и вопрос.
 
 import type { Store } from '../store/store.ts';
 import { truncate, type Clock } from '../core/util.ts';
@@ -24,7 +24,9 @@ const HELP = [
   '/prefs — ваши сохранённые предпочтения',
   '/resume <id> — продолжить инициативу после паузы',
   '/pause — не запускать новую работу; /resume — снова запускать',
+  '/auto off — студия не берёт задачи сама; /auto on — снова берёт',
   'Готовые результаты приходят карточкой с кнопками «Одобрить», «На доработку», «Отклонить».',
+  'Короткая правка: просто напишите, что не так, и нажмите «Это правка к …».',
 ].join('\n');
 
 export interface Scheduler {
@@ -131,9 +133,13 @@ export class OwnerBot {
     }
     const pendingId = `p${this.clock.now().toString(36)}`;
     await this.store.put('tg-pending', pendingId, { text, ts: this.clock.now() });
-    await this.api.sendMessage(this.chatId, `Создать задачу для студии?\n«${truncate(text, 300)}»`, {
-      inline_keyboard: [[{ text: 'Создать задачу', callback_data: `n:${pendingId}:y` }, { text: 'Нет', callback_data: `n:${pendingId}:n` }]],
-    });
+    // Если версия ждёт решения, короткое сообщение чаще всего — правка к ней: одна кнопка.
+    const waiting = (await this.studio.approvals()).filter((a) => a.status === 'pending').at(-1);
+    const ini = waiting ? await this.studio.get(waiting.initiativeId).catch(() => null) : null;
+    const rows: Keyboard['inline_keyboard'] = [];
+    if (waiting && ini) rows.push([{ text: `✏️ Это правка к «${truncate(ini.title, 28)}» v${waiting.version}`, callback_data: `q:${pendingId}:${waiting.id}` }]);
+    rows.push([{ text: waiting ? 'Новая задача' : 'Создать задачу', callback_data: `n:${pendingId}:y` }, { text: 'Нет', callback_data: `n:${pendingId}:n` }]);
+    await this.api.sendMessage(this.chatId, waiting && ini ? `Это правка или новая задача?\n«${truncate(text, 300)}»` : `Создать задачу для студии?\n«${truncate(text, 300)}»`, { inline_keyboard: rows });
   }
 
   private async onCommand(text: string): Promise<void> {
@@ -194,6 +200,14 @@ export class OwnerBot {
         this.scheduler.schedule(arg);
         await this.api.sendMessage(this.chatId, `▶️ Продолжаю ${arg}.`);
         return;
+      case '/auto': {
+        const on = arg !== 'off';
+        await this.store.put('control', 'autonomy', { enabled: on, ts: this.clock.now() });
+        await this.api.sendMessage(this.chatId, on
+          ? '💡 Студия снова сама берёт задачи, когда очередь пустая (днём, одна за раз, следующая — после вашего решения).'
+          : '⏹ Студия больше не берёт задачи сама. Ваши задачи и правки выполняются как обычно. /auto on — включить.');
+        return;
+      }
       default:
         await this.api.sendMessage(this.chatId, HELP);
     }
@@ -226,6 +240,16 @@ export class OwnerBot {
       await this.api.answerCallback(queryId);
       if (messageId) await this.api.editKeyboard(chatId, messageId, { inline_keyboard: [] });
       if (pending && action === 'y') await this.createInitiative(pending.text);
+      return;
+    }
+    if (kind === 'q') {
+      // q:<pendingId>:<approvalId> — короткое сообщение владельца как правка к версии.
+      const approvalId = data.slice(`q:${id}:`.length);
+      const pending = await this.store.get<{ text: string }>('tg-pending', id);
+      await this.store.delete('tg-pending', id);
+      await this.api.answerCallback(queryId, 'Принимаю правку…');
+      if (messageId) await this.api.editKeyboard(chatId, messageId, { inline_keyboard: [] });
+      if (pending) await this.finishDecision(approvalId, 'changes', { feedback: pending.text });
       return;
     }
     if (kind === 'a') {
@@ -307,6 +331,10 @@ export interface CardPayload {
   changed: string;
   why: string;
   schools?: string[];
+  /** Подача ведущего: старшая роль в манере своей школы, подписана как AI. */
+  presenter?: { label: string; headline: string; story: string; question: string } | null;
+  references?: Array<{ title: string; url: string }>;
+  autonomous?: boolean;
   problem: string;
   status: string;
   checks: string;
@@ -317,13 +345,16 @@ export interface CardPayload {
 }
 
 export function cardCaption(p: CardPayload, prLine: string): string {
+  const pr = p.presenter;
   const lines = [
-    `DRIVE&KAVA — ${p.title} · v${p.version}`,
+    `DRIVE&KAVA — ${p.title} · v${p.version}${p.autonomous ? ' · студия взяла сама' : ''}`,
     '',
-    `Что изменено:\n${truncate(p.changed, 320)}`,
-    `Почему сильно: ${truncate(p.why, 200)}`,
-    p.schools?.length ? `Школы: ${truncate(p.schools.slice(0, 4).join('; '), 220)}` : '',
-    `Решает: ${truncate(p.problem, 160)}`,
+    ...(pr ? [`🎙 ${pr.label}`, `«${truncate(pr.headline, 90)}»`, truncate(pr.story, 360), `❓ ${truncate(pr.question, 140)}`, ''] : []),
+    p.version > 1 || !pr ? `Что изменено:\n${truncate(p.changed, pr ? 220 : 320)}` : '',
+    pr ? '' : `Почему сильно: ${truncate(p.why, 200)}`,
+    p.schools?.length ? `Школы: ${truncate(p.schools.slice(0, 3).join('; '), 180)}` : '',
+    p.references?.length ? `Референсы: ${p.references.slice(0, 2).map((r) => `${truncate(r.title, 40)} — ${r.url}`).join('; ')}` : '',
+    pr ? '' : `Решает: ${truncate(p.problem, 160)}`,
     `Статус: ${p.status}`,
     `Проверки: ${p.checks} · оценка ${p.score}/5 · $${p.costUsd}`,
     prLine,
@@ -345,7 +376,7 @@ export function approvalKeyboard(approvalId: string): Keyboard {
 
 const STATUS: Record<string, string> = { running: 'в работе', awaiting_owner: 'ждёт вашего решения', paused: 'на паузе', blocked: 'не прошло внутренний контроль', failed: 'сбой', approved: 'утверждено', rejected: 'отклонено', declined: 'не задача студии' };
 const DECISION: Record<string, string> = { approved: '✅', rejected: '❌', changes_requested: '✏️', superseded: '↪️' };
-const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', paused_schedule: 'пауза: нерабочее время', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии' };
+const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', paused_schedule: 'пауза: нерабочее время', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии', senior_review: 'проверка старших', autonomy: 'студия взяла сама' };
 
 /** Очередь запусков: инициативы выполняются по одной, после каждой — доставка outbox. */
 export class RunQueue implements Scheduler {

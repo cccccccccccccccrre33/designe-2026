@@ -19,6 +19,18 @@ Drinkit · Creative Director контента Drinkit больше четырё�
 Планка: Серия узнаётся без логотипа. Сравнение — с лучшими в ремесле, не с конкурентами.
 Избегать: Отдельные несвязанные кадры вместо истории. Бриф, расписанный до кадра, — он убивает идею.
 
+## Евгения (Jane) Песякова — вкус
+<!-- meta: id=PR-pesyakova-taste; tier=A; tags=practitioner,drinkit-content,pesyakova,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/210009497/Set-design-for-Drinkit -->
+Ценит:
+- фактура вместо буквального ингредиента: любимая работа — тыквенный латте 2023 из поролоновых трубок, без самой тыквы — https://de.linkedin.com/in/evgeniya-pesyakova/en
+- у каждого бренда свой визуальный язык, не шаблон студии — https://de.linkedin.com/in/evgeniya-pesyakova/en
+- видение, свобода вместо тесного брифа, много экспериментов, сравнение с лучшими в ремесле — https://www.linkedin.com/posts/evgeniya-pesyakova_bye-bye-drinkit-my-journey-as-creative-activity-7492478621664870400-k-6T
+- каждая сцена раскрывает историю конкретного напитка и не взаимозаменяема (наша интерпретация)
+Отвергает:
+- тесный бриф, расписанный до кадра — https://www.linkedin.com/posts/evgeniya-pesyakova_bye-bye-drinkit-my-journey-as-creative-activity-7492478621664870400-k-6T
+- буквальный ингредиент рядом со стаканом как единственная идея (наша интерпретация)
+Не известно (не выдумывать): авторство сцен — у экипажа по титрам, не только у неё
+
 ## Источники
 - Set-design for Drinkit (титры) (тир A): https://www.behance.net/gallery/210009497/Set-design-for-Drinkit
 - Spring Drop (титры) (тир A): https://www.behance.net/gallery/212123605/photo-video-drinkit-spring-drop

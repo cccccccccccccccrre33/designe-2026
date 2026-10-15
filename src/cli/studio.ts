@@ -10,6 +10,8 @@
 //   eval [--class c] [--models a,b] [--scripted]  сравнительное тестирование моделей
 //   knowledge-ingest <file.md>   разобрать архив ссылок в knowledge/sources/inbox-*.md
 //   analyze-video <файл> "<вопрос>" --seconds N   разбор видео видеомоделью (Pegasus)
+//   study [--only id1,id2] [--max N] [--scripted] [--no-state]
+//                                прочитать ссылки школ и выписать вкус и методы с цитатами (knowledge/study)
 //   actions-session [--minutes N] [--force] [--no-state] [--scripted]
 //                                сессия в GitHub Actions: рабочие часы, Telegram, состояние (ADR-0007)
 
@@ -34,6 +36,8 @@ import { describeHours, loadSchedule, workWindow } from '../runtime/schedule.ts'
 import { StateSync, stateKey, type RestoreReport } from '../runtime/state.ts';
 import { formatSessionSummary, runSession } from '../runtime/session.ts';
 import { VideoStudio } from '../pipeline/video.ts';
+import { formatStudySummary, runStudy, studyTargets } from '../knowledge/study.ts';
+import { round } from '../core/util.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 loadDotEnv(join(ROOT, '.env'));
@@ -173,13 +177,15 @@ async function main(): Promise<void> {
       return actionsSession();
     case 'analyze-video':
       return analyzeVideo();
+    case 'study':
+      return study();
     default:
       console.log(readHelp());
   }
 }
 
 function readHelp(): string {
-  return 'Команды: demo | new "<задача>" | status | budget | decide <id> approve|reject|changes "<текст>" | resume <id> | telegram | render <spec.json> | check-bedrock | eval | knowledge-ingest <file.md> | actions-session';
+  return 'Команды: demo | new "<задача>" | status | budget | decide <id> approve|reject|changes "<текст>" | resume <id> | telegram | render <spec.json> | check-bedrock | eval | knowledge-ingest <file.md> | actions-session | study';
 }
 
 /** Сводка на странице запуска GitHub Actions (и в консоль). */
@@ -206,7 +212,7 @@ async function actionsSession(): Promise<void> {
   if (!window.open && !force) {
     await summary(formatSessionSummary({
       status: 'night', local: window.local, minutesToOpen: window.minutesToOpen, hours: describeHours(schedule), stoppedBy: null, paused: false,
-      updates: 0, resumed: [], task: null, initiatives: [], budget: null, saves: 0, errors: [],
+      updates: 0, resumed: [], task: null, autonomy: [], initiatives: [], budget: null, saves: 0, errors: [],
     }));
     return;
   }
@@ -316,6 +322,40 @@ async function checkBedrock(): Promise<void> {
     `Не проверялись (платный вызов с картинкой или видео): ${skipped.join(', ')}.`,
     'Модель с ❌ студия просто пропускает и берёт следующую из списка.', '',
   ].join('\n'));
+}
+
+/**
+ * Изучение публикаций практиков: каждая ссылка школы → текст → дешёвая модель выписывает
+ * вкус и методы с дословными цитатами → knowledge/study/<практик>.md. Расход идёт в общий
+ * бюджет (в Actions — с зашифрованным состоянием, как у сессий).
+ */
+async function study(): Promise<void> {
+  const scripted = flag('scripted');
+  if (!scripted && !env('AWS_BEARER_TOKEN_BEDROCK')) {
+    await summary('## Изучение публикаций\n\n⏳ Нет секрета AWS_BEARER_TOKEN_BEDROCK — изучать нечем.\n');
+    return;
+  }
+  const schedule = await loadSchedule(ROOT);
+  const state = !flag('no-state') && env('STUDIO_STATE_KEY')
+    ? new StateSync({ repoRoot: ROOT, dataDir: join(ROOT, '.studio-data'), key: stateKey(env('STUDIO_STATE_KEY')), clock: systemClock, retention: schedule.retention })
+    : null;
+  if (state) await state.restore();
+  const app = await createApp({ repoRoot: ROOT, mode: scripted ? 'scripted' : undefined, quiet: true, telegram: null, github: null });
+  try {
+    const book = app.studio.d.practitioners;
+    if (!book) throw new Error('Нет studio/org/practitioners.json');
+    const all = await studyTargets(book, ROOT, opt('only')?.split(','));
+    const max = Number(opt('max') ?? 0);
+    const targets = max > 0 ? all.slice(0, max) : all;
+    console.log(`Ссылок к изучению: ${targets.length}`);
+    const before = (await app.ledger.summary()).month.spentUsd;
+    const results = await runStudy({ router: app.router, book, roles: app.studio.d.roles, repoRoot: ROOT, date: new Date().toISOString().slice(0, 10), log: (l) => console.log(l) }, targets);
+    await summary(formatStudySummary(results, round((await app.ledger.summary()).month.spentUsd - before, 4)));
+  } finally {
+    await app.close();
+    if (state) await state.save('study').catch((e) => console.error(`Состояние не сохранено: ${(e as Error).message}`));
+  }
+  process.exit(process.exitCode ?? 0);
 }
 
 /** Разбор видео видеомоделью (Pegasus): analyze-video <файл.mp4> "<вопрос>" --seconds N */

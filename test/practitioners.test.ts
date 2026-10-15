@@ -34,6 +34,19 @@ test('школы: секция промпта содержит границу и
   assert.equal(book.schoolSection('нет-такой-роли'), '');
 });
 
+test('школы: вкус — факты только со ссылкой, интерпретации помечены, пробелы не выдумываются', () => {
+  const s = book.schoolSection('creative-director');
+  assert.match(s, /Вкус школы — ценит: .*Logo Modernism/);
+  assert.match(s, /Вкус школы — отвергает: .*\(наша интерпретация\)/);
+  assert.match(s, /Не известно о вкусе \(не выдумывать\)/);
+  const bad = new PractitionerBook({
+    boundary: 'b',
+    lineage: {},
+    practitioners: [{ ...book.get('perov')!, taste: { likes: [{ text: 'любит синий', basis: 'fact' }], dislikes: [] } }],
+  });
+  assert.match(bad.validate(new Set()).join('\n'), /факт вкуса без источника/);
+});
+
 test('школы: подпись для владельца отбрасывает выдуманные приёмы', () => {
   assert.deepEqual(book.credit(['PEROV-USUAL', 'ВЫДУМКА', 'RUB-RUBBER-BAND']), ['Перов: «Как обычно?»', 'Рубанов: Слайдер-резинка']);
   assert.deepEqual(book.credit(['DODO-ORDER-TYPE', 'PR-FULL-BLEED', 'IOS-LIQUID-GLASS', 'CNT-DROP-STORY']), [

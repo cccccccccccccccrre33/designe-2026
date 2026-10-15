@@ -15,6 +15,12 @@ Dodo Pizza (дизайн-команда, канал @designdodo) · Дизайн
 Планка: Доступность — удобство для всех, а не отдельный режим.
 Избегать: Макеты, проверенные только на стандартном размере текста.
 
+## Мария Гаврина — вкус
+<!-- meta: id=PR-gavrina-taste; tier=A; tags=practitioner,dodo-product,gavrina,taste; kind=practitioner; rights=public-reference-only; url=https://ru.linkedin.com/posts/mariiairi_доступность-в-dodo-pizza-и-новый-файл-в-activity-7269731875156357121-XxjT -->
+Ценит:
+- поддержка системного увеличения шрифта как норма — https://ru.linkedin.com/posts/mariiairi_доступность-в-dodo-pizza-и-новый-файл-в-activity-7269731875156357121-XxjT
+- привлекательный маркетинговый экран, который остаётся доступным (наша интерпретация)
+
 ## Источники
 - Доступность в Dodo Pizza и файл в Figma Community (тир A): https://ru.linkedin.com/posts/mariiairi_доступность-в-dodo-pizza-и-новый-файл-в-activity-7269731875156357121-XxjT
 

@@ -14,6 +14,12 @@ Drinkit (контент-продакшн) · Фуд-стайлист · школ
 Планка: Напиток выглядит как тот, что подаст бариста.
 Избегать: Идеализация, вводящая гостя в заблуждение.
 
+## Екатерина Шеронова — вкус
+<!-- meta: id=PR-sheronova-taste; tier=A; tags=practitioner,drinkit-content,sheronova,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/katesheronova -->
+Ценит:
+- реалистичные ингредиенты и физика молока, пены, сиропа, льда, конденсата (наша интерпретация)
+Не известно (не выдумывать): личных правил стилинга публично нет — общую физику не выдавать за её вкус
+
 ## Источники
 - Behance (тир A): https://www.behance.net/katesheronova
 - Latte Earl Grey & Sagan-Daila (тир A): https://www.behance.net/gallery/195008305/Latte-Earl-Grey-Latte-Sagan-Daila-DRINKIT

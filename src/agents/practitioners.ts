@@ -12,6 +12,13 @@ export interface Signature {
   basis: 'source' | 'visual';
 }
 
+/** Элемент вкуса: факт из публикаций (с источником) или наша интерпретация. */
+export interface TasteItem {
+  text: string;
+  basis: 'fact' | 'interpretation';
+  source?: string;
+}
+
 export interface Practitioner {
   id: string;
   name: string;
@@ -24,6 +31,8 @@ export interface Practitioner {
   qualityBar: string[];
   avoid: string[];
   confidence?: string;
+  /** Профессиональный вкус: что ценит и что отвергает в работе; gaps — чего не знаем (не выдумывать). */
+  taste?: { likes: TasteItem[]; dislikes: TasteItem[]; gaps?: string[] };
 }
 
 export interface LineageEntry {
@@ -38,7 +47,11 @@ interface PractitionersFile {
   lineage: Record<string, LineageEntry[]>;
 }
 
-const ALLOWED_KEYS = new Set(['id', 'name', 'org', 'role', 'school', 'sources', 'signatures', 'method', 'qualityBar', 'avoid', 'confidence']);
+const ALLOWED_KEYS = new Set(['id', 'name', 'org', 'role', 'school', 'sources', 'signatures', 'method', 'qualityBar', 'avoid', 'confidence', 'taste']);
+
+function tasteLine(t: TasteItem): string {
+  return `${t.text}${t.basis === 'interpretation' ? ' (наша интерпретация)' : ''}`;
+}
 
 export const SCHOOL_NAMES: Record<string, string> = {
   'drinkit-product': 'Drinkit — продукт и арт-дирекшн',
@@ -100,6 +113,11 @@ export class PractitionerBook {
         seen.add(s.id);
         if (!s.rule || !s.apply) errors.push(`${s.id}: нужны rule и apply`);
       }
+      for (const t of [...(p.taste?.likes ?? []), ...(p.taste?.dislikes ?? [])]) {
+        if (!t.text || !['fact', 'interpretation'].includes(t.basis)) errors.push(`${p.id}: элемент вкуса без текста или основания`);
+        // Факт о вкусе человека — только со ссылкой на его публикацию.
+        if (t.basis === 'fact' && !/^https:\/\//.test(t.source ?? '')) errors.push(`${p.id}: факт вкуса без источника («${t.text.slice(0, 40)}»)`);
+      }
     }
     for (const [roleId, entries] of Object.entries(this.lineage)) {
       if (!roleIds.has(roleId)) errors.push(`школа для несуществующей роли ${roleId}`);
@@ -143,10 +161,21 @@ export class PractitionerBook {
         if (p.method.length) lines.push(`  Метод: ${p.method.join(' ')}`);
         if (p.qualityBar.length) lines.push(`  Планка: ${p.qualityBar.join(' ')}`);
         if (p.avoid.length) lines.push(`  Избегать: ${p.avoid.join(' ')}`);
+        if (p.taste) {
+          // Вкус — чтобы роль судила как эта школа: что ценит и что отвергает.
+          if (p.taste.likes.length) lines.push(`  Вкус школы — ценит: ${p.taste.likes.map(tasteLine).join('; ')}`);
+          if (p.taste.dislikes.length) lines.push(`  Вкус школы — отвергает: ${p.taste.dislikes.map(tasteLine).join('; ')}`);
+          if (p.taste.gaps?.length) lines.push(`  Не известно о вкусе (не выдумывать): ${p.taste.gaps.join('; ')}`);
+        }
       }
     }
     lines.push('Применяй приёмы осознанно, ссылаясь на их ID (signaturesUsed), и не копируй экраны и бренд-элементы источников.');
     return lines.join('\n');
+  }
+
+  /** Имена практиков основной школы роли — для подписи ведущего: «школа: Гаврил Перов». */
+  primaryNames(roleId: string): string[] {
+    return (this.lineage[roleId] ?? []).filter((e) => e.weight === 'primary').map((e) => this.byId.get(e.practitioner)?.name).filter((n): n is string => Boolean(n));
   }
 
   /** Подпись для карточки владельцу: «Перов: Как обычно?». */
@@ -178,6 +207,13 @@ export class PractitionerBook {
       if (p.method.length) out.push(`Метод: ${p.method.join(' ')}`);
       if (p.qualityBar.length) out.push(`Планка: ${p.qualityBar.join(' ')}`);
       if (p.avoid.length) out.push(`Избегать: ${p.avoid.join(' ')}`);
+      out.push('');
+    }
+    if (p.taste) {
+      out.push(`## ${p.name} — вкус`, meta('-taste', ',taste'));
+      if (p.taste.likes.length) out.push('Ценит:', ...p.taste.likes.map((t) => `- ${tasteLine(t)}${t.source ? ` — ${t.source}` : ''}`));
+      if (p.taste.dislikes.length) out.push('Отвергает:', ...p.taste.dislikes.map((t) => `- ${tasteLine(t)}${t.source ? ` — ${t.source}` : ''}`));
+      if (p.taste.gaps?.length) out.push(`Не известно (не выдумывать): ${p.taste.gaps.join('; ')}`);
       out.push('');
     }
     out.push('## Источники', ...p.sources.map((s) => `- ${s.title} (тир ${s.tier}): ${s.url}`), '');

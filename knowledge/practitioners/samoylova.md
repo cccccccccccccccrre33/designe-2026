@@ -17,6 +17,14 @@ Dodo Brands (Dodo Pizza Россия и международные рынки) �
 Планка: Продукт в кадре равен продукту на кассе.
 Избегать: Искусственный реквизит вместо физики прохлады. Украшения, которых нет в рецепте.
 
+## Анна Самойлова — вкус
+<!-- meta: id=PR-samoylova-taste; tier=A; tags=practitioner,dodo-content,samoylova,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign -->
+Ценит:
+- настоящий лёд, пузырьки, конденсат и слои как художественный язык прохлады — https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign
+- только настоящие съедобные продукты в кадре — https://www.behance.net/gallery/231597743/International-Food-Styling-for-Dodo-Pizza-Global
+Отвергает:
+- искусственный реквизит и AI вместо физики прохлады — https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign
+
 ## Источники
 - Dodo Pizza Summer Drinks Campaign (2026) (тир A): https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign
 - Commercial Beverage Styling (Dodo) (тир A): https://www.behance.net/gallery/222903499/Commercial-Beverage-Styling

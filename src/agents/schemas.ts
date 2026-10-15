@@ -154,6 +154,44 @@ export const feedbackSchema: Schema = {
   },
 };
 
+/** Следующая самостоятельная задача студии (директор студии, автономный режим). */
+export const autonomyPlanSchema: Schema = {
+  type: 'object',
+  required: ['skip', 'title', 'request', 'why'],
+  properties: {
+    skip: { type: 'boolean', description: 'true — сейчас нет задачи, которая стоит денег владельца' },
+    reason: str('почему пропуск'),
+    title: str('короткое название по-русски', 80),
+    request: str('задача так, как её поставил бы владелец: экран и проблема гостя, 1–3 предложения'),
+    why: str('почему именно это сейчас приближает приложение к цели — 1–2 предложения для владельца'),
+    references: strList('ID карточек базы знаний, на которые опирается выбор', 0, 4),
+  },
+};
+
+/** Короткая подача результата владельцу от ведущего (старшая роль в манере своей школы). */
+export const pitchSchema: Schema = {
+  type: 'object',
+  required: ['headline', 'story', 'question'],
+  properties: {
+    headline: str('заголовок подачи, до 80 знаков', 80),
+    story: str('2–3 предложения: что сделали и почему это сильно, своим профессиональным вкусом; без лести и без обещаний'),
+    question: str('один короткий вопрос владельцу, на который легко ответить'),
+    references: strList('ID карточек базы знаний, которые стоит открыть как референс', 0, 3),
+  },
+};
+
+/** Заметки изучения публикации практика: только то, что подтверждается цитатой. */
+export const studyNotesSchema: Schema = {
+  type: 'object',
+  required: ['relevant', 'likes', 'dislikes', 'methods'],
+  properties: {
+    relevant: { type: 'boolean', description: 'false — страница не о работе практика (логин, ошибка, чужой текст)' },
+    likes: { type: 'array', maxItems: 6, items: { type: 'object', required: ['text', 'quote'], properties: { text: str('что ценит в работе'), quote: str('дословная цитата со страницы') } } },
+    dislikes: { type: 'array', maxItems: 6, items: { type: 'object', required: ['text', 'quote'], properties: { text: str('что отвергает в работе'), quote: str('дословная цитата со страницы') } } },
+    methods: { type: 'array', maxItems: 6, items: { type: 'object', required: ['text', 'quote'], properties: { text: str('приём или метод работы'), quote: str('дословная цитата со страницы') } } },
+  },
+};
+
 export const technicalNoteSchema: Schema = {
   type: 'object',
   required: ['question', 'model', 'recommendation', 'confidence', 'limits'],

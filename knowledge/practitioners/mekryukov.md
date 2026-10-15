@@ -19,6 +19,17 @@ Dodo Brands (Head of Design IT, период Dodo/Drinkit) · Руководит
 Планка: Делать сложное простым и не останавливаться на «в макете было красиво».
 Избегать: Одинаковые интерфейсы, как у всех. Красивое без решённой задачи. Эмоция, которая мешает бренду или конверсии.
 
+## Сергей Мекрюков — вкус
+<!-- meta: id=PR-mekryukov-taste; tier=A; tags=practitioner,dodo-drinkit-leadership,mekryukov,taste; kind=practitioner; rights=public-reference-only; url=https://t.me/emo_design -->
+Ценит:
+- сильный финальный UI, хорошо поданный, и ясный личный вклад автора — https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf
+- эмоциональный дизайн как продуктовая функция — опыт, которым хочется поделиться — https://ru.linkedin.com/posts/mekryukov_%D1%82%D1%8B-%D1%82%D0%B0%D0%BA%D0%BE%D0%B9-%D1%8D%D0%BC%D0%BE%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B2-%D0%B4%D0%BE%D0%B4%D0%BE-head-activity-7457341043802386432-TSOi
+- доказуемый результат вместо красивых отчётов (наша интерпретация)
+Отвергает:
+- безликая AI-графика, теряющая профессиональную идентичность — https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf
+- одинаковые интерфейсы «как у всех» и красивое без решённой задачи (наша интерпретация)
+Не известно (не выдумывать): текущую должность не путать с периодом Dodo/Drinkit
+
 ## Источники
 - Telegram @emo_design (тир A): https://t.me/emo_design
 - Hiring Year Recap (тир A): https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf

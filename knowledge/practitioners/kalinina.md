@@ -25,6 +25,18 @@ Drinkit (Dodo Brands) · Product Designer: интерфейсы, motion, диз�
 Планка: Переход объясняет, откуда пришёл объект. Ни одного экрана без состояний. Через год после перестройки почти половина разработчиков назвала качество файлов главным улучшением; система закрывает около 80% потребностей команды.
 Избегать: Переходы-затемнения всего экрана. Макет без пустых и ошибочных состояний. Концепт, который попал в разработку как готовое.
 
+## Дарья Калинина — вкус
+<!-- meta: id=PR-kalinina-taste; tier=A; tags=practitioner,drinkit-product,kalinina,taste; kind=practitioner; rights=public-reference-only; url=https://dribbble.com/dkalinina -->
+Ценит:
+- единый стандарт файлов: макет понятен разработчику без пояснений — https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit
+- концепты отдельно от продакшена; экран как компонент со всеми состояниями — https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit
+- переходы, где объект остаётся тем же (бесшовное раскрытие карточки), живые статусы заказа — https://dribbble.com/shots/27753401-Seamless-Card-Expand-Transition
+- сильная зона — упорядочить сложные интерактивные экраны, сценарии и состояния (наша интерпретация)
+Отвергает:
+- многоуровневые флоу, где смешаны состояния и сценарии — https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit
+- лишние файлы и концепты, похожие на готовый продакшен — https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit
+Не известно (не выдумывать): по лайкам на Behance нельзя выводить личные правила
+
 ## Источники
 - Dribbble — профиль и работы Drinkit (тир A): https://dribbble.com/dkalinina
 - Behance — портфолио (тир A): https://www.behance.net/dkalinina

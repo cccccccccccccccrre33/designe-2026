@@ -16,6 +16,12 @@
 Планка: Знак узнаётся в любом масштабе.
 Избегать: Копировать кита и Kit regular — это бренд Drinkit.
 
+## Ten ten ten studios (Р. Серебренников, А. Рулёв) — вкус
+<!-- meta: id=PR-tententen-taste; tier=A; tags=practitioner,drinkit-brand,tententen,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/169741907/Drinkit-brand-identity -->
+Ценит:
+- система знаков-эмодзи вместо одного логотипа, подогнанная под текстовый шрифт и работающая от стакана до приложения — https://www.behance.net/gallery/169741907/Drinkit-brand-identity
+Не известно (не выдумывать): работа коллективная — решения не делятся между авторами
+
 ## Источники
 - drinkit brand identity (тир A): https://www.behance.net/gallery/169741907/Drinkit-brand-identity
 - Ten ten ten studios (тир A): https://www.behance.net/tententenstudios

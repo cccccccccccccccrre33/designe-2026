@@ -25,6 +25,18 @@ Zenly, amo (бывший руководитель дизайна) · Дизай�
 Планка: Главный риск — быть незапоминающимся, а не ошибиться.
 Избегать: Безопасный отполированный усреднённый результат. Тексты, звучащие как машинные. Скорость, выданная за качество.
 
+## Julien Martin — вкус
+<!-- meta: id=PR-julien-martin-taste; tier=A; tags=practitioner,amo,julien-martin,taste; kind=practitioner; rights=public-reference-only; url=https://www.theplaybook.company/p/look-and-feel-is-your-moat -->
+Ценит:
+- Minimum Lovable Product вместо безличного MVP — https://www.theplaybook.company/p/look-and-feel-is-your-moat
+- эмоция = графика + движение + звук + хаптика + голос интерфейса — https://www.theplaybook.company/p/secret-sauce
+- тепло и игра; игровые миры, музыка, неожиданный контраст, культурные отсылки — https://www.linkedin.com/posts/martinjulien_julien-martin-why-amos-design-hits-different-activity-7429935938723680256-PQyo
+- иконки как вход в характер продукта — https://www.theplaybook.company/p/icons-love-letter
+Отвергает:
+- холодная эксклюзивная luxury-эстетика (ошибка раннего amo) — https://www.linkedin.com/posts/martinjulien_julien-martin-why-amos-design-hits-different-activity-7429935938723680256-PQyo
+- безопасный усреднённый результат и тексты, звучащие как машинные — https://www.theplaybook.company/p/look-and-feel-is-your-moat
+Не известно (не выдумывать): это практики Zenly и раннего amo — не приписывать всей команде
+
 ## Источники
 - Look and Feel Is Your Moat (тир A): https://www.theplaybook.company/p/look-and-feel-is-your-moat
 - Secret Sauce (тир A): https://www.theplaybook.company/p/secret-sauce

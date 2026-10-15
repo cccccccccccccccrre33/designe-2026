@@ -16,7 +16,14 @@ export interface SchedulePolicy {
     telegramPollSeconds: number;
     finishStepGraceMinutes: number;
   };
+  /** Самостоятельная работа студии в пустые дневные часы (src/pipeline/autonomy.ts). */
+  autonomy?: { enabled: boolean; idleMinutes: number; maxPerDay: number; minMinutesLeft: number };
   retention: { closedArtifactsDays: number; telegramSeenDays: number };
+}
+
+/** Дата по часовому поясу студии: «2026-10-15». */
+export function localDate(now: number, timezone: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(now));
 }
 
 export interface WorkWindow {
@@ -51,6 +58,7 @@ export function validateSchedule(p: SchedulePolicy): string[] {
   if (p.workHours?.start === p.workHours?.end) errors.push('начало и конец рабочего дня совпадают');
   if (!Array.isArray(p.days) || !p.days.length || p.days.some((d) => !DAYS.includes(d))) errors.push('days — из mon…sun');
   if (!(p.session?.maxMinutes > 0 && p.session.maxMinutes <= 330)) errors.push('session.maxMinutes — от 1 до 330 (лимит задания GitHub — 6 часов)');
+  if (p.autonomy && !(p.autonomy.idleMinutes >= 0 && p.autonomy.maxPerDay >= 0 && p.autonomy.minMinutesLeft >= 0)) errors.push('autonomy: idleMinutes, maxPerDay, minMinutesLeft — неотрицательные числа');
   return errors;
 }
 

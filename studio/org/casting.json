@@ -49,5 +49,17 @@
     "photo": { "addPositions": ["food-stylist", "product-photographer"] },
     "video": { "addPositions": ["video-motion-art-director"] }
   },
-  "limits": { "maxPositions": 5, "maxCritics": 3, "maxConsults": 2 }
+  "limits": { "maxPositions": 5, "maxCritics": 3, "maxConsults": 2 },
+  "review": {
+    "_comment": "Старшие смотрят результат до владельца: всё, за что было бы неловко перед владельцем, исправляется здесь (до maxRounds доработок). Показывает результат владельцу ведущий (presenter) — роль в манере своей школы, подписанная как AI.",
+    "seniors": ["creative-director", "head-of-product-design"],
+    "maxRounds": 1,
+    "presenter": { "default": "creative-director", "autonomous": "studio-director", "byType": { "drink-visuals": "beverage-art-director" } },
+    "titles": {
+      "studio-director": "Директор студии",
+      "creative-director": "Креативный директор",
+      "head-of-product-design": "Руководитель продуктового дизайна",
+      "beverage-art-director": "Креативный директор напитков"
+    }
+  }
 }

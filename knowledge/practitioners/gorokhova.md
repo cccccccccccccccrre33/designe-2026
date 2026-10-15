@@ -18,6 +18,12 @@ Dodo Brands · Концепт-дизайнер · школа «Dodo — прод
 Планка: Направления различаются идеей.
 Избегать: Детализация одного направления до выбора.
 
+## Анна Горохова (GOROSHA) — вкус
+<!-- meta: id=PR-gorokhova-taste; tier=A; tags=practitioner,dodo-product,gorokhova,taste; kind=practitioner; rights=public-reference-only; url=https://t.me/goroshaaa -->
+Ценит:
+- мастер-макет для быстрого художественного поиска до финализации — https://t.me/goroshaaa
+Не известно (не выдумывать): прямых высказываний о палитрах и стилях нет
+
 ## Источники
 - Telegram GOROSHA (тир A): https://t.me/goroshaaa
 - Concept demo (Loom) (тир A): https://www.loom.com/share/440652a2048241429bc3dbc7fa52fa26

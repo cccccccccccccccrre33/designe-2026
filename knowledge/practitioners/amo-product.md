@@ -19,6 +19,16 @@ amo · Продукт, UX/UI, социальные механики, 3D и motio
 Планка: Выбор жанра редакторов стора и любовь пользователей.
 Избегать: Холодная элитарность.
 
+## Продуктовая команда amo (Bump, ID; V. Fougères, J. Gonçalves, I. Nalimov, S. Shekhawat, E. Julliot, Anagram) — вкус
+<!-- meta: id=PR-amo-product-taste; tier=A; tags=practitioner,amo,amo-product,taste; kind=practitioner; rights=public-reference-only; url=https://www.linkedin.com/posts/amoamoamo_distilling-the-core-of-your-app-experience-activity-7241393902807580672-IezE -->
+Ценит:
+- в малом пространстве — сначала эмоционально значимый объект и точное состояние; текст места можно заменить скоростью (И. Налимов, Bump-виджет) — https://www.linkedin.com/posts/amoamoamo_distilling-the-core-of-your-app-experience-activity-7241393902807580672-IezE
+- социальные механики 0→1: подарки, совместные действия, удобный шеринг (Ж. Гонсалвеш) — https://joseg.pt/about
+- интерфейс, который меняется от поведения пользователя, а не от украшений (С. Шекхават) (наша интерпретация)
+Отвергает:
+- перегруженные виджеты и второстепенный текст вперёд главного состояния (наша интерпретация)
+Не известно (не выдумывать): о личной эстетике И. Ма и В. Фужера публичных разборов мало — не фантазировать
+
 ## Источники
 - Bump widget rationale (amo, LinkedIn) (тир A): https://www.linkedin.com/posts/amoamoamo_distilling-the-core-of-your-app-experience-activity-7241393902807580672-IezE
 - Bump — App Store (тир A): https://apps.apple.com/us/app/bump-by-amo/id6471519217
