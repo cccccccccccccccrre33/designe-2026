@@ -49,6 +49,7 @@ export const SCHOOL_NAMES: Record<string, string> = {
   'dodo-drinkit-leadership': 'Dodo/Drinkit — дизайн-лидерство',
   'dodo-product': 'Dodo — продуктовый дизайн',
   'dodo-craft': 'Dodo — инженерное ремесло интерфейса',
+  'dodo-content': 'Dodo — предметная съёмка, стилинг и видеопродакшен',
   amo: 'amo / Zenly — эмоция и характер',
   studios: 'Независимые студии',
 };

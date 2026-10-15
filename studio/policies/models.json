@@ -141,6 +141,16 @@
     {
       "key": "stable-image-inpaint", "modelId": "us.stability.stable-image-inpaint-v1:0", "kind": "image", "family": "stability",
       "input": ["text", "image"], "price": { "perImage": 0.07, "confidence": "low" }, "enabled": true, "region": "us-west-2"
+    },
+    {
+      "key": "sd3.5-large", "modelId": "stability.sd3-5-large-v1:0", "kind": "image", "family": "stability",
+      "input": ["text", "image"], "price": { "perImage": 0.08, "confidence": "low" }, "enabled": true, "region": "us-west-2",
+      "notes": "Текст→фото и фото→фото, 1 Мп. Только us-west-2. Цена в карточке не опубликована — сверить."
+    },
+    {
+      "key": "luma-ray2", "modelId": "luma.ray-v2:0", "kind": "video", "family": "luma",
+      "input": ["text", "image"], "price": null, "enabled": false, "region": "us-west-2",
+      "notes": "Генерация видео (текст или фото → ролик 5–9 с, 540p/720p, петля). Только StartAsyncInvoke с сохранением в S3: нужен бакет S3 и права на него — до этого выключена. Nova Reel не используем: снята с поддержки 30.09.2026."
     }
   ],
   "assignments": {
@@ -152,7 +162,8 @@
     "spec": ["glm-5.3", "glm-4.7", "minimax-m2.5", "deepseek-v3.2", "claude-haiku-4.5"],
     "critique": ["qwen3-vl-235b", "grok-4.6", "kimi-k3", "nova-2-lite", "llama-4-maverick", "nova-pro", "kimi-k2.5", "claude-haiku-4.5"],
     "science": ["deepseek-v3.2", "glm-4.7", "minimax-m2.5"],
-    "arbiter": ["grok-4.7", "kimi-k3", "claude-sonnet-4.6"]
+    "arbiter": ["grok-4.7", "kimi-k3", "claude-sonnet-4.6"],
+    "photo": ["grok-4.7", "grok-4.6", "gpt-5.6-luna", "kimi-k3", "claude-haiku-4.5"]
   },
   "evalThresholds": {
     "classify": 0.85,
@@ -165,5 +176,5 @@
   "breaker": { "failures": 3, "cooldownMs": 600000 },
   "retry": { "maxAttemptsPerCall": 4, "retryDelayMs": 2000 },
   "images": { "search": "stable-image-core", "final": "stable-image-ultra", "inpaint": "stable-image-inpaint" },
-  "video": { "analyze": "pegasus-1.5" }
+  "video": { "analyze": "pegasus-1.5", "generate": "luma-ray2" }
 }

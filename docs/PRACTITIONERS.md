@@ -22,15 +22,16 @@
 | Accessibility Specialist | Мария Гаврина, Михаил Рубанов | — |
 | Design Researcher | Продуктовый дизайн Dodo Pizza (Б. Герн, Н. Полозников, Ю. Емельянова, С. Лапухин) | Non-Objective (Катя Сикачёва) (1) |
 | Visual Interface Critic | Julien Martin | Сергей Мекрюков (1) |
-| Beverage Art Director ★ | Евгения (Jane) Песякова, Татьяна Прядко | Гаврил Перов (3) |
-| Commercial Product Photographer | Владимир Петров | — |
-| Set Designer | Татьяна Прядко | Саша Кулагина (2), Pentagram — Bottega (Andrea Trabucco-Campos) (1) |
-| Food Stylist | Екатерина Шеронова | — |
+| Beverage Creative Director ★ | Евгения (Jane) Песякова, Татьяна Прядко | Гаврил Перов (3), Анна Самойлова (2) |
+| Director of Photography ★ | Владимир Петров, Фотографы напитков Dodo (Д. Дёмин, К. Семёнов) | — |
+| Set & Prop Designer ★ | Татьяна Прядко | Саша Кулагина (3), Pentagram — Bottega (Andrea Trabucco-Campos) (1) |
+| Food & Beverage Stylist ★ | Екатерина Шеронова, Анна Самойлова | — |
 | Color & Lighting Artist | Татьяна Прядко, Владимир Петров | — |
-| Retouching Specialist | Алиса Правоторова | — |
+| Retouching & Postproduction Artist ★ | Алиса Правоторова | — |
 | CGI / 3D Visual Artist | Продуктовая команда amo (Bump, ID; V. Fougères, J. Gonçalves, I. Nalimov, S. Shekhawat, E. Julliot, Anagram) | Гаврил Перов (1) |
-| AI Image Production Specialist | Гаврил Перов | Евгения (Jane) Песякова (1) |
-| Video & Motion Art Director | Татьяна Прядко, Владимир Петров | PORTO ROCHA (Felipe Rocha, Leo Porto) (1) |
+| AI Image & Video Production Specialist | Гаврил Перов | Евгения (Jane) Песякова (1), Анна Самойлова (1) |
+| Media Production Lead ★ | Евгения (Jane) Песякова | Анна Самойлова (1), Татьяна Прядко (1) |
+| Beverage Motion Director ★ | Татьяна Прядко, Владимир Петров | Видеопродакшены Dodo (1:30 Studio, FAZA, Yep! Agency) (2), PORTO ROCHA (Felipe Rocha, Leo Porto) (1) |
 | Motion Designer ★ | Дарья Калинина, Julien Martin | Дмитрий Максимов (1), Михаил Рубанов (2) |
 | Microinteraction Designer | Julien Martin, UX-редакция Dodo Engineering (Виктория, «Я кончился») | Анна Горохова (GOROSHA) (1), Кристина Шевцова (2) |
 | Haptics Consultant | Михаил Рубанов | Julien Martin (1), Кристина Шевцова (1) |
@@ -63,11 +64,14 @@
 | Максим Качинкин (канал @mobilefiction, по каталогу владельца) | Dodo Engineering (Android), Drinkit | Drinkit — инженерное ремесло интерфейса | 4 | 2 | [досье](../knowledge/practitioners/kachinkin.md) |
 | Никита Тугарин | Drinkit | Drinkit — пространство | 2 | 1 | [досье](../knowledge/practitioners/tugarin.md) |
 | Евгения (Jane) Песякова | Drinkit | Drinkit — предметный контент | 6 | 6 | [досье](../knowledge/practitioners/pesyakova.md) |
-| Татьяна Прядко | Drinkit (контент-продакшн) | Drinkit — предметный контент | 9 | 10 | [досье](../knowledge/practitioners/priadko.md) |
-| Владимир Петров | Drinkit (контент-продакшн) | Drinkit — предметный контент | 3 | 3 | [досье](../knowledge/practitioners/petrov.md) |
-| Саша Кулагина | Drinkit (контент-продакшн) | Drinkit — предметный контент | 2 | 3 | [досье](../knowledge/practitioners/kulagina.md) |
+| Татьяна Прядко | Drinkit (контент-продакшн) | Drinkit — предметный контент | 12 | 12 | [досье](../knowledge/practitioners/priadko.md) |
+| Владимир Петров | Drinkit (контент-продакшн) | Drinkit — предметный контент | 4 | 4 | [досье](../knowledge/practitioners/petrov.md) |
+| Саша Кулагина | Drinkit (контент-продакшн) | Drinkit — предметный контент | 3 | 5 | [досье](../knowledge/practitioners/kulagina.md) |
 | Екатерина Шеронова | Drinkit (контент-продакшн) | Drinkit — предметный контент | 2 | 2 | [досье](../knowledge/practitioners/sheronova.md) |
 | Алиса Правоторова | Drinkit (контент-продакшн) | Drinkit — предметный контент | 1 | 2 | [досье](../knowledge/practitioners/pravotorova.md) |
+| Анна Самойлова | Dodo Brands (Dodo Pizza Россия и международные рынки) | Dodo — предметная съёмка, стилинг и видеопродакшен | 4 | 4 | [досье](../knowledge/practitioners/samoylova.md) |
+| Фотографы напитков Dodo (Д. Дёмин, К. Семёнов) | Dodo Brands | Dodo — предметная съёмка, стилинг и видеопродакшен | 2 | 4 | [досье](../knowledge/practitioners/dodo-beverage-photo.md) |
+| Видеопродакшены Dodo (1:30 Studio, FAZA, Yep! Agency) | Внешние студии для Dodo Pizza | Dodo — предметная съёмка, стилинг и видеопродакшен | 2 | 4 | [досье](../knowledge/practitioners/dodo-video-production.md) |
 | Ten ten ten studios (Р. Серебренников, А. Рулёв) | Внешняя студия для Drinkit | Drinkit — айдентика | 3 | 2 | [досье](../knowledge/practitioners/tententen.md) |
 | Анна Горохова (GOROSHA) | Dodo Brands | Dodo — продуктовый дизайн | 5 | 2 | [досье](../knowledge/practitioners/gorokhova.md) |
 | Жаннетта Серова | Dodo Pizza | Dodo — продуктовый дизайн | 2 | 1 | [досье](../knowledge/practitioners/serova.md) |

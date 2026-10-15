@@ -9,7 +9,9 @@ export type TaskClass =
   | 'spec'
   | 'critique'
   | 'science'
-  | 'arbiter';
+  | 'arbiter'
+  /** Фото-бриф и промпт генерации: смотрит макет экрана, пишет сцену, свет, физику напитка. */
+  | 'photo';
 
 export interface ModelEntry {
   key: string;
@@ -38,7 +40,7 @@ export interface ModelRegistryConfig {
   breaker: { failures: number; cooldownMs: number };
   retry: { maxAttemptsPerCall: number; retryDelayMs: number };
   images: { search: string; final: string; inpaint?: string };
-  video?: { analyze: string };
+  video?: { analyze: string; generate?: string };
 }
 
 export interface VideoRequest {

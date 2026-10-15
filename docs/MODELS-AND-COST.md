@@ -36,7 +36,15 @@
 | critique (с картинками) | Qwen3 VL 235B ($0.53 / $2.66) → Grok 4.6 ($2.20 / $6.60) → Kimi K3 ($3.30 / $16.50) → Nova 2 Lite → Llama 4 Maverick (≈) → Nova Pro (≈) → Kimi K2.5 → Claude Haiku 4.5 |
 | science | DeepSeek V3.2 → GLM 4.7 → MiniMax M2.5 |
 | arbiter | Grok 4.7 ($2.20 / $6.60) → Kimi K3 → Claude Sonnet 4.6 |
-| видео | TwelveLabs Pegasus 1.5 (≈ $0.00049 за секунду видео + $7.50 за 1 млн токенов ответа) — команда `npm run studio -- analyze-video` |
+| photo (фото-бриф и промпт, видят макет экрана) | Grok 4.7 → Grok 4.6 → GPT-5.6 Luna → Kimi K3 → Claude Haiku 4.5 |
+| создание фото | поиск — Stable Image Core ($0.04), финал — Stable Image Ultra ($0.14), альтернатива — SD 3.5 Large (≈ $0.08), правки — Stable Image Inpaint |
+| понимание видео | TwelveLabs Pegasus 1.5 (≈ $0.00049 за секунду видео + $7.50 за 1 млн токенов ответа) — команда `npm run studio -- analyze-video` |
+| создание видео | Luma Ray2 (`luma.ray-v2:0`) — выключена: работает только с сохранением в бакет S3 |
+
+Grok, GPT и Kimi картинки **не рисуют** — они видят экран, пишут сцену, свет, физику
+напитка и промпт, а рисуют модели Stability. Видео в Bedrock создаёт только Luma Ray2
+(Nova Reel снята с поддержки 30.09.2026); Ray2 сохраняет ролик только в S3, поэтому
+включается после того, как появится бакет и доступ к нему.
 
 Особенности:
 - GLM 5.3, Kimi K3, GPT-5.6 Luna, Grok 4.6/4.7, Pegasus 1.5 вызываются только через
