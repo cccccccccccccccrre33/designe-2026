@@ -8,6 +8,7 @@
       "org": "Drinkit (Dodo Brands)",
       "role": "Art Director, продуктовый дизайн на стыке продукта, бренда и контента",
       "school": "drinkit-product",
+      "taste": {"likes":[{"text":"простые минималистичные знаки в духе Logo Modernism; ERA Capital — один из любимых собственных знаков","basis":"fact","source":"https://www.linkedin.com/posts/gavrilperov_logotypes-by-gavril-while-im-preparing-activity-7475864284061904897-b6tF"},{"text":"бесшовность цифрового и физического продукта — приложение как продолжение кофейни","basis":"fact","source":"https://www.linkedin.com/posts/gavrilperov_drinkit-app-whats-next-do-you-remember-activity-7418956656744652800-8zJL"},{"text":"персонализация, которая даёт пользу, а не декоративные опции","basis":"fact","source":"https://www.behance.net/gallery/249944147/Drinkit-App-Vision"},{"text":"глубина, свечение, тени и плотная графика как источник идей — удачные находки смелого концепта переносятся в итоговый","basis":"fact","source":"https://www.linkedin.com/posts/gavrilperov_a-concept-too-wild-to-go-live-since-activity-7335384194442813440-27kn"},{"text":"открытый процесс: регулярный дизайн-дайджест, общие примеры в Figma, большая насмотренность (6000+ референсов)","basis":"fact","source":"https://www.linkedin.com/posts/gavrilperov_inside-drinkits-design-kitchen-most-activity-7459991552367689728-82Fq"},{"text":"выразительность держится на сильной структуре","basis":"interpretation"}],"dislikes":[{"text":"настройки ради настроек и декоративная персонализация","basis":"fact","source":"https://www.behance.net/gallery/249944147/Drinkit-App-Vision"},{"text":"выразительность как самоцель, без структуры и пользы","basis":"interpretation"}],"gaps":["отвергнутый «дикий» концепт не значит неприязнь к его эстетике","сохранённый пин не равен одобрению приёма"]},
       "sources": [
         { "title": "Drinkit App Vision (Behance, соавторы Д. Калинина, С. Мекрюков)", "url": "https://www.behance.net/gallery/249944147/Drinkit-App-Vision", "tier": "A" },
         { "title": "Behance — портфолио", "url": "https://www.behance.net/gavrilperov", "tier": "A" },
@@ -57,6 +58,7 @@
       "org": "Drinkit (Dodo Brands)",
       "role": "Product Designer: интерфейсы, motion, дизайн-системы",
       "school": "drinkit-product",
+      "taste": {"likes":[{"text":"единый стандарт файлов: макет понятен разработчику без пояснений","basis":"fact","source":"https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit"},{"text":"концепты отдельно от продакшена; экран как компонент со всеми состояниями","basis":"fact","source":"https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit"},{"text":"переходы, где объект остаётся тем же (бесшовное раскрытие карточки), живые статусы заказа","basis":"fact","source":"https://dribbble.com/shots/27753401-Seamless-Card-Expand-Transition"},{"text":"сильная зона — упорядочить сложные интерактивные экраны, сценарии и состояния","basis":"interpretation"}],"dislikes":[{"text":"многоуровневые флоу, где смешаны состояния и сценарии","basis":"fact","source":"https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit"},{"text":"лишние файлы и концепты, похожие на готовый продакшен","basis":"fact","source":"https://vc.ru/design/3131346-organizatsiya-rabotyi-v-figma-dlya-dizaynerov-v-drinkit"}],"gaps":["по лайкам на Behance нельзя выводить личные правила"]},
       "sources": [
         { "title": "Dribbble — профиль и работы Drinkit", "url": "https://dribbble.com/dkalinina", "tier": "A" },
         { "title": "Behance — портфолио", "url": "https://www.behance.net/dkalinina", "tier": "A" },
@@ -95,6 +97,7 @@
       "org": "Dodo Brands (Head of Design IT, период Dodo/Drinkit)",
       "role": "Руководитель дизайна, эмоциональный дизайн, найм и культура",
       "school": "dodo-drinkit-leadership",
+      "taste": {"likes":[{"text":"сильный финальный UI, хорошо поданный, и ясный личный вклад автора","basis":"fact","source":"https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf"},{"text":"эмоциональный дизайн как продуктовая функция — опыт, которым хочется поделиться","basis":"fact","source":"https://ru.linkedin.com/posts/mekryukov_%D1%82%D1%8B-%D1%82%D0%B0%D0%BA%D0%BE%D0%B9-%D1%8D%D0%BC%D0%BE%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B2-%D0%B4%D0%BE%D0%B4%D0%BE-head-activity-7457341043802386432-TSOi"},{"text":"доказуемый результат вместо красивых отчётов","basis":"interpretation"}],"dislikes":[{"text":"безликая AI-графика, теряющая профессиональную идентичность","basis":"fact","source":"https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf"},{"text":"одинаковые интерфейсы «как у всех» и красивое без решённой задачи","basis":"interpretation"}],"gaps":["текущую должность не путать с периодом Dodo/Drinkit"]},
       "sources": [
         { "title": "Telegram @emo_design", "url": "https://t.me/emo_design", "tier": "A" },
         { "title": "Hiring Year Recap", "url": "https://www.linkedin.com/posts/mekryukov_hiring-year-recap-what-candidates-were-activity-7405152465509249024-rEmf", "tier": "A" },
@@ -229,6 +232,7 @@
       "org": "Drinkit",
       "role": "Creative Director контента Drinkit больше четырёх лет (в титрах съёмок — Creative Content Lead)",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"фактура вместо буквального ингредиента: любимая работа — тыквенный латте 2023 из поролоновых трубок, без самой тыквы","basis":"fact","source":"https://de.linkedin.com/in/evgeniya-pesyakova/en"},{"text":"у каждого бренда свой визуальный язык, не шаблон студии","basis":"fact","source":"https://de.linkedin.com/in/evgeniya-pesyakova/en"},{"text":"видение, свобода вместо тесного брифа, много экспериментов, сравнение с лучшими в ремесле","basis":"fact","source":"https://www.linkedin.com/posts/evgeniya-pesyakova_bye-bye-drinkit-my-journey-as-creative-activity-7492478621664870400-k-6T"},{"text":"каждая сцена раскрывает историю конкретного напитка и не взаимозаменяема","basis":"interpretation"}],"dislikes":[{"text":"тесный бриф, расписанный до кадра","basis":"fact","source":"https://www.linkedin.com/posts/evgeniya-pesyakova_bye-bye-drinkit-my-journey-as-creative-activity-7492478621664870400-k-6T"},{"text":"буквальный ингредиент рядом со стаканом как единственная идея","basis":"interpretation"}],"gaps":["авторство сцен — у экипажа по титрам, не только у неё"]},
       "sources": [
         { "title": "Set-design for Drinkit (титры)", "url": "https://www.behance.net/gallery/210009497/Set-design-for-Drinkit", "tier": "A" },
         { "title": "Spring Drop (титры)", "url": "https://www.behance.net/gallery/212123605/photo-video-drinkit-spring-drop", "tier": "A" },
@@ -255,6 +259,7 @@
       "org": "Drinkit (контент-продакшн)",
       "role": "Head Set Designer, креативное направление сцены",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"вкус через метафору: цитрусовый кекс, цветы, ледяные блоки — декорация служит напитку","basis":"fact","source":"https://www.behance.net/gallery/210009497/Set-design-for-Drinkit"},{"text":"прямоугольные формы бренда, голубые градиенты, прозрачные материалы","basis":"fact","source":"https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design"},{"text":"физически возможная сцена под смысл и температуру напитка","basis":"interpretation"}],"dislikes":[{"text":"слишком активный неон на переднем плане — его уводят в глубину","basis":"fact","source":"https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design"}]},
       "sources": [
         { "title": "Set-design for Drinkit", "url": "https://www.behance.net/gallery/210009497/Set-design-for-Drinkit", "tier": "A" },
         { "title": "Drinkit: visual identity through set design", "url": "https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design", "tier": "A" },
@@ -293,6 +298,7 @@
       "org": "Drinkit (контент-продакшн)",
       "role": "Фотограф предметной съёмки и видео",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"фотореализм света, стекла и жидкости; оптика меняется от проекта к проекту","basis":"interpretation"}],"dislikes":[],"gaps":["личных высказываний о любимой оптике и запретах в свете нет — не выдумывать"]},
       "sources": [
         { "title": "Behance", "url": "https://www.behance.net/petrovvladimir", "tier": "A" },
         { "title": "Summer Menu: Photo & Video", "url": "https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit", "tier": "A" },
@@ -315,6 +321,7 @@
       "org": "Drinkit (контент-продакшн)",
       "role": "Сет-дизайнер: ассистент Т. Прядко на осени и Хеллоуине, ведущий сет-дизайнер дропов Хеллоуин 2025 и Новый год 2026",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"работа с материалами: пластик, силикон, воск, дерево, металл, живые цветы","basis":"fact","source":"https://www.behance.net/sashakulagina"}],"dislikes":[],"gaps":["личные проекты не смешивать с командными титрами"]},
       "sources": [
         { "title": "Behance — портфолио", "url": "https://www.behance.net/sashakulagina", "tier": "A" },
         { "title": "Drinkit New Year's Drop (фото/видео В. Петров, фуд-стайлинг К. Низова)", "url": "https://www.behance.net/gallery/241601991/Drinkit-New-Years-Drop", "tier": "A" },
@@ -338,6 +345,7 @@
       "org": "Drinkit (контент-продакшн)",
       "role": "Фуд-стайлист",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"реалистичные ингредиенты и физика молока, пены, сиропа, льда, конденсата","basis":"interpretation"}],"dislikes":[],"gaps":["личных правил стилинга публично нет — общую физику не выдавать за её вкус"]},
       "sources": [
         { "title": "Behance", "url": "https://www.behance.net/katesheronova", "tier": "A" },
         { "title": "Latte Earl Grey & Sagan-Daila", "url": "https://www.behance.net/gallery/195008305/Latte-Earl-Grey-Latte-Sagan-Daila-DRINKIT", "tier": "A" }
@@ -356,6 +364,7 @@
       "org": "Drinkit (контент-продакшн)",
       "role": "Ретушёр",
       "school": "drinkit-content",
+      "taste": {"likes":[{"text":"контроль артефактов света, отражений, цвета и краёв","basis":"interpretation"}],"dislikes":[],"gaps":["публичных личных правил обработки нет"]},
       "sources": [
         { "title": "Behance", "url": "https://www.behance.net/sadpigeonart", "tier": "A" },
         { "title": "Summer Menu (титры)", "url": "https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit", "tier": "A" }
@@ -374,6 +383,7 @@
       "org": "Dodo Brands (Dodo Pizza Россия и международные рынки)",
       "role": "Фуд- и бевередж-стилист; на международных съёмках — ещё и контроль качества продукта и координация продакшена",
       "school": "dodo-content",
+      "taste": {"likes":[{"text":"настоящий лёд, пузырьки, конденсат и слои как художественный язык прохлады","basis":"fact","source":"https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign"},{"text":"только настоящие съедобные продукты в кадре","basis":"fact","source":"https://www.behance.net/gallery/231597743/International-Food-Styling-for-Dodo-Pizza-Global"}],"dislikes":[{"text":"искусственный реквизит и AI вместо физики прохлады","basis":"fact","source":"https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign"}]},
       "sources": [
         { "title": "Dodo Pizza Summer Drinks Campaign (2026)", "url": "https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign", "tier": "A" },
         { "title": "Commercial Beverage Styling (Dodo)", "url": "https://www.behance.net/gallery/222903499/Commercial-Beverage-Styling", "tier": "A" },
@@ -437,6 +447,7 @@
       "org": "Внешняя студия для Drinkit",
       "role": "Айдентика, арт-дирекшн, шрифтовой дизайн",
       "school": "drinkit-brand",
+      "taste": {"likes":[{"text":"система знаков-эмодзи вместо одного логотипа, подогнанная под текстовый шрифт и работающая от стакана до приложения","basis":"fact","source":"https://www.behance.net/gallery/169741907/Drinkit-brand-identity"}],"dislikes":[],"gaps":["работа коллективная — решения не делятся между авторами"]},
       "sources": [
         { "title": "drinkit brand identity", "url": "https://www.behance.net/gallery/169741907/Drinkit-brand-identity", "tier": "A" },
         { "title": "Ten ten ten studios", "url": "https://www.behance.net/tententenstudios", "tier": "A" }
@@ -456,6 +467,7 @@
       "org": "Dodo Brands",
       "role": "Концепт-дизайнер",
       "school": "dodo-product",
+      "taste": {"likes":[{"text":"мастер-макет для быстрого художественного поиска до финализации","basis":"fact","source":"https://t.me/goroshaaa"}],"dislikes":[],"gaps":["прямых высказываний о палитрах и стилях нет"]},
       "sources": [
         { "title": "Telegram GOROSHA", "url": "https://t.me/goroshaaa", "tier": "A" },
         { "title": "Concept demo (Loom)", "url": "https://www.loom.com/share/440652a2048241429bc3dbc7fa52fa26", "tier": "A" }
@@ -477,6 +489,7 @@
       "org": "Dodo Pizza",
       "role": "Продуктовый дизайнер: киоски и мобильное приложение",
       "school": "dodo-product",
+      "taste": {"likes":[{"text":"единая визуальная система через киоск и приложение","basis":"interpretation"}],"dislikes":[],"gaps":["публичных разборов предпочтений мало"]},
       "sources": [
         { "title": "Макеты киосков Dodo Pizza в Figma Community", "url": "https://ru.linkedin.com/posts/zhannetta-serova-74b8969b_%D0%BC%D0%B0%D0%BA%D0%B5%D1%82%D1%8B-%D0%BA%D0%B8%D0%BE%D1%81%D0%BA%D0%BE%D0%B2-dodo-pizza-%D0%B2-figma-community-activity-7270450936567812097-NnOk", "tier": "A" }
       ],
@@ -524,6 +537,7 @@
       "org": "Dodo Engineering",
       "role": "Лид Android-дизайн-системы Dodo Pizza, Live Updates",
       "school": "dodo-product",
+      "taste": {"likes":[{"text":"дизайн-система как договорённость дизайна и разработки: паспорта компонентов, скриншотные тесты, без дублей","basis":"fact","source":"https://habr.com/ru/companies/dododev/articles/1074898/"}],"dislikes":[{"text":"дубли одного компонента в разных фичах","basis":"fact","source":"https://habr.com/ru/companies/dododev/articles/1074898/"}],"gaps":["инженерные практики не равны художественному вкусу"]},
       "sources": [
         { "title": "Дизайн-система в Додо: модуль компонентов — ещё не система (Habr)", "url": "https://habr.com/ru/companies/dododev/articles/1074898/", "tier": "A" },
         { "title": "Live Updates на Android: где макеты врут (Habr)", "url": "https://habr.com/ru/companies/dododev/articles/969810/", "tier": "A" }
@@ -545,6 +559,7 @@
       "org": "Dodo Pizza (дизайн-команда, канал @designdodo)",
       "role": "Дизайнер: доступность приложения, динамический шрифт",
       "school": "dodo-product",
+      "taste": {"likes":[{"text":"поддержка системного увеличения шрифта как норма","basis":"fact","source":"https://ru.linkedin.com/posts/mariiairi_доступность-в-dodo-pizza-и-новый-файл-в-activity-7269731875156357121-XxjT"},{"text":"привлекательный маркетинговый экран, который остаётся доступным","basis":"interpretation"}],"dislikes":[]},
       "sources": [
         { "title": "Доступность в Dodo Pizza и файл в Figma Community", "url": "https://ru.linkedin.com/posts/mariiairi_доступность-в-dodo-pizza-и-новый-файл-в-activity-7269731875156357121-XxjT", "tier": "A" }
       ],
@@ -618,6 +633,7 @@
       "org": "Zenly, amo (бывший руководитель дизайна)",
       "role": "Дизайн-лидер: вкус, характер продукта, look & feel",
       "school": "amo",
+      "taste": {"likes":[{"text":"Minimum Lovable Product вместо безличного MVP","basis":"fact","source":"https://www.theplaybook.company/p/look-and-feel-is-your-moat"},{"text":"эмоция = графика + движение + звук + хаптика + голос интерфейса","basis":"fact","source":"https://www.theplaybook.company/p/secret-sauce"},{"text":"тепло и игра; игровые миры, музыка, неожиданный контраст, культурные отсылки","basis":"fact","source":"https://www.linkedin.com/posts/martinjulien_julien-martin-why-amos-design-hits-different-activity-7429935938723680256-PQyo"},{"text":"иконки как вход в характер продукта","basis":"fact","source":"https://www.theplaybook.company/p/icons-love-letter"}],"dislikes":[{"text":"холодная эксклюзивная luxury-эстетика (ошибка раннего amo)","basis":"fact","source":"https://www.linkedin.com/posts/martinjulien_julien-martin-why-amos-design-hits-different-activity-7429935938723680256-PQyo"},{"text":"безопасный усреднённый результат и тексты, звучащие как машинные","basis":"fact","source":"https://www.theplaybook.company/p/look-and-feel-is-your-moat"}],"gaps":["это практики Zenly и раннего amo — не приписывать всей команде"]},
       "sources": [
         { "title": "Look and Feel Is Your Moat", "url": "https://www.theplaybook.company/p/look-and-feel-is-your-moat", "tier": "A" },
         { "title": "Secret Sauce", "url": "https://www.theplaybook.company/p/secret-sauce", "tier": "A" },
@@ -651,6 +667,7 @@
       "org": "amo",
       "role": "Продукт, UX/UI, социальные механики, 3D и motion",
       "school": "amo",
+      "taste": {"likes":[{"text":"в малом пространстве — сначала эмоционально значимый объект и точное состояние; текст места можно заменить скоростью (И. Налимов, Bump-виджет)","basis":"fact","source":"https://www.linkedin.com/posts/amoamoamo_distilling-the-core-of-your-app-experience-activity-7241393902807580672-IezE"},{"text":"социальные механики 0→1: подарки, совместные действия, удобный шеринг (Ж. Гонсалвеш)","basis":"fact","source":"https://joseg.pt/about"},{"text":"интерфейс, который меняется от поведения пользователя, а не от украшений (С. Шекхават)","basis":"interpretation"}],"dislikes":[{"text":"перегруженные виджеты и второстепенный текст вперёд главного состояния","basis":"interpretation"}],"gaps":["о личной эстетике И. Ма и В. Фужера публичных разборов мало — не фантазировать"]},
       "sources": [
         { "title": "Bump widget rationale (amo, LinkedIn)", "url": "https://www.linkedin.com/posts/amoamoamo_distilling-the-core-of-your-app-experience-activity-7241393902807580672-IezE", "tier": "A" },
         { "title": "Bump — App Store", "url": "https://apps.apple.com/us/app/bump-by-amo/id6471519217", "tier": "A" },

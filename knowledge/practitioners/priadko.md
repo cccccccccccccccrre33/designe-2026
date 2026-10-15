@@ -25,6 +25,15 @@ Drinkit (контент-продакшн) · Head Set Designer, креативн
 Планка: Напиток — в центре, сцена подчинена ему.
 Избегать: Фрукты рядом со стаканом как единственная идея. Неон на переднем плане.
 
+## Татьяна Прядко — вкус
+<!-- meta: id=PR-priadko-taste; tier=A; tags=practitioner,drinkit-content,priadko,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/210009497/Set-design-for-Drinkit -->
+Ценит:
+- вкус через метафору: цитрусовый кекс, цветы, ледяные блоки — декорация служит напитку — https://www.behance.net/gallery/210009497/Set-design-for-Drinkit
+- прямоугольные формы бренда, голубые градиенты, прозрачные материалы — https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design
+- физически возможная сцена под смысл и температуру напитка (наша интерпретация)
+Отвергает:
+- слишком активный неон на переднем плане — его уводят в глубину — https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design
+
 ## Источники
 - Set-design for Drinkit (тир A): https://www.behance.net/gallery/210009497/Set-design-for-Drinkit
 - Drinkit: visual identity through set design (тир A): https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design

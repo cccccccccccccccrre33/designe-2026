@@ -16,6 +16,12 @@ Drinkit (контент-продакшн) · Сет-дизайнер: ассис
 Планка: Сцена держит праздник одной крупной идеей.
 Избегать: Набор стандартных праздничных атрибутов вместо одной идеи.
 
+## Саша Кулагина — вкус
+<!-- meta: id=PR-kulagina-taste; tier=A; tags=practitioner,drinkit-content,kulagina,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/sashakulagina -->
+Ценит:
+- работа с материалами: пластик, силикон, воск, дерево, металл, живые цветы — https://www.behance.net/sashakulagina
+Не известно (не выдумывать): личные проекты не смешивать с командными титрами
+
 ## Источники
 - Behance — портфолио (тир A): https://www.behance.net/sashakulagina
 - Drinkit New Year's Drop (фото/видео В. Петров, фуд-стайлинг К. Низова) (тир A): https://www.behance.net/gallery/241601991/Drinkit-New-Years-Drop

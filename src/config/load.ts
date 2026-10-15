@@ -23,6 +23,13 @@ export interface Casting {
   types: Record<string, CastingType>;
   tagTriggers: Record<string, { addPositions?: string[]; consult?: string[] }>;
   limits: { maxPositions: number; maxCritics: number; maxConsults: number };
+  /** Проверка старшими до владельца и ведущий, который показывает результат. */
+  review?: {
+    seniors: string[];
+    maxRounds: number;
+    presenter: { default: string; autonomous?: string; byType?: Record<string, string> };
+    titles?: Record<string, string>;
+  };
 }
 
 export interface Rubric {

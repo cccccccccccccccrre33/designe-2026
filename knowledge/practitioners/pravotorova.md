@@ -13,6 +13,12 @@ Drinkit (контент-продакшн) · Ретушёр · школа «Drin
 Планка: Нет артефактов на 100% масштабе.
 Избегать: Пластиковая ретушь.
 
+## Алиса Правоторова — вкус
+<!-- meta: id=PR-pravotorova-taste; tier=A; tags=practitioner,drinkit-content,pravotorova,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/sadpigeonart -->
+Ценит:
+- контроль артефактов света, отражений, цвета и краёв (наша интерпретация)
+Не известно (не выдумывать): публичных личных правил обработки нет
+
 ## Источники
 - Behance (тир A): https://www.behance.net/sadpigeonart
 - Summer Menu (титры) (тир A): https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit

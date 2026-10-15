@@ -10,7 +10,8 @@
 #                          STUDIO_ENABLED = off  (или кнопка Disable workflow во вкладке Actions)
 #   запустить сейчас      — Actions → «Студия» → Run workflow (можно сразу дать задачу)
 #   проверить модели      — Run workflow → «Что сделать» = check-models
-#   пауза из Telegram     — /pause и /resume
+#   изучить ссылки школ   — Run workflow → «Что сделать» = study (выводы — отдельным PR)
+#   пауза из Telegram     — /pause и /resume; самостоятельные задачи — /auto off и /auto on
 name: Студия
 
 on:
@@ -28,6 +29,7 @@ on:
         options:
           - session
           - check-models
+          - study
       task:
         description: 'Новая задача для студии (необязательно)'
         required: false
@@ -82,6 +84,28 @@ jobs:
         run: |
           if [ "$STUDIO_ACTION" = "check-models" ]; then
             node src/cli/studio.ts check-bedrock
+          elif [ "$STUDIO_ACTION" = "study" ]; then
+            node src/cli/studio.ts study
           else
             node src/cli/studio.ts actions-session
           fi
+      # study: выводы о вкусе и методах школ — отдельным PR; слияние — только по решению владельца.
+      - name: PR с результатами изучения
+        if: inputs.action == 'study'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain -- knowledge/study)" ]; then
+            echo "Новых выводов нет."
+            exit 0
+          fi
+          branch="studio/study-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -- knowledge/study
+          git commit -m "Изучение публикаций практиков: вкус и методы с цитатами"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Изучение публикаций практиков" \
+            --body "Выводы задания study: что школы ценят и отвергают, приёмы и методы — только с дословными цитатами со страниц. Недоступные страницы перечислены в файлах. Сводка и расход — на странице запуска. Слияние — по решению владельца."

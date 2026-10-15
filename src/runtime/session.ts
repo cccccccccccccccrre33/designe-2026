@@ -3,12 +3,14 @@
 //   2. продолжить начатое (в том числе остановленное вчера вечером) и задачу из ручного запуска;
 //   3. до конца сессии слушать Telegram владельца и вести очередь инициатив;
 //   4. каждые несколько минут и в конце — сохранить состояние;
-//   5. перед закрытием новые шаги не начинаются: инициатива встаёт на паузу на границе
+//   5. если очередь пустая — директор студии сам берёт следующую задачу к цели (autonomy);
+//   6. перед закрытием новые шаги не начинаются: инициатива встаёт на паузу на границе
 //      шага и утром продолжается без повторной оплаты сделанного.
 
 import type { App } from '../app.ts';
 import { truncate, type Clock } from '../core/util.ts';
-import { describeHours, workWindow, type SchedulePolicy } from './schedule.ts';
+import { autonomousTick } from '../pipeline/autonomy.ts';
+import { describeHours, localDate, workWindow, type SchedulePolicy } from './schedule.ts';
 
 export interface SessionOptions {
   app: App;
@@ -38,6 +40,8 @@ export interface SessionReport {
   updates: number;
   resumed: string[];
   task: { id: string; title: string; status: string } | null;
+  /** Что студия сделала сама: взятые задачи и причины пропуска. */
+  autonomy: string[];
   initiatives: Array<{ id: string; title: string; status: string; version: number; waiting: boolean }>;
   budget: { daySpent: number; dayLimit: number; monthSpent: number; monthLimit: number } | null;
   saves: number;
@@ -54,7 +58,7 @@ export async function runSession(o: SessionOptions): Promise<SessionReport> {
   const window = workWindow(start, schedule);
   const report: SessionReport = {
     status: 'done', local: window.local, minutesToOpen: window.minutesToOpen, hours: describeHours(schedule), stoppedBy: null,
-    paused: false, updates: 0, resumed: [], task: null, initiatives: [], budget: null, saves: 0, errors: [],
+    paused: false, updates: 0, resumed: [], task: null, autonomy: [], initiatives: [], budget: null, saves: 0, errors: [],
   };
   if (!window.open && !o.force) {
     report.status = 'night';
@@ -115,12 +119,33 @@ export async function runSession(o: SessionOptions): Promise<SessionReport> {
     }
   };
 
+  // Самостоятельная работа: только при Telegram (иначе владелец не увидит результат),
+  // не на паузе, после idleMinutes пустой очереди и если до конца сессии хватает времени.
+  const auto = schedule.autonomy;
+  let idleSince = clock.now();
+  const tryAutonomy = async (): Promise<boolean> => {
+    if (!auto?.enabled || !app.telegram || app.queue.paused || app.queue.active) return false;
+    if (clock.now() - idleSince < auto.idleMinutes * 60_000 || deadline - clock.now() < auto.minMinutesLeft * 60_000) return false;
+    idleSince = clock.now(); // одна попытка на период простоя
+    try {
+      const r = await autonomousTick({ studio: app.studio, store: app.store, ledger: app.ledger, outbox: app.outbox, clock, schedule: (id) => app.queue.schedule(id) }, auto, localDate(clock.now(), schedule.timezone));
+      const line = 'started' in r ? `взята задача «${r.started.title}»` : `пропуск: ${r.skipped}`;
+      if (report.autonomy.at(-1) !== line) report.autonomy.push(line);
+      return 'started' in r;
+    } catch (err) {
+      report.errors.push(`самостоятельная задача: ${truncate((err as Error).message, 200)}`);
+      return false;
+    }
+  };
+
   while (true) {
     const now = clock.now();
     if (now >= deadline) {
       report.stoppedBy = now >= closeAt ? 'close' : 'deadline';
       break;
     }
+    if (app.queue.active) idleSince = now;
+    else await tryAutonomy();
     if (app.telegram && app.bot) {
       const timeout = Math.max(0, Math.min(s.telegramPollSeconds, Math.floor((deadline - now) / 1000) - 1));
       try {
@@ -197,6 +222,7 @@ export function formatSessionSummary(r: SessionReport, extra: string[] = []): st
   if (r.paused) lines.push('⏸ Новая работа на паузе (команда /pause в Telegram; /resume — снова запускать).');
   if (r.task) lines.push(`Задача из GitHub: «${r.task.title}» — ${r.task.status === 'duplicate' ? 'уже в работе' : r.task.id}.`);
   if (r.resumed.length) lines.push(`Продолжено с прошлой сессии: ${r.resumed.length}.`);
+  for (const a of r.autonomy) lines.push(`Сама: ${a}.`);
   lines.push(`Сообщений из Telegram обработано: ${r.updates}. Сохранений состояния: ${r.saves}.`);
   if (r.budget) lines.push(`Бюджет: сегодня $${r.budget.daySpent} из $${r.budget.dayLimit}, месяц $${r.budget.monthSpent} из $${r.budget.monthLimit}.`);
   lines.push('', r.initiatives.length ? '| Задача | Статус | Версия |\n|---|---|---|' : 'Открытых задач нет.');

@@ -24,6 +24,20 @@ Drinkit (Dodo Brands) · Art Director, продуктовый дизайн на 
 Планка: Сложное читается за секунду (визуализация данных, статусы). Минимализм, который не стареет: решение должно работать и через годы. Простые знаки в каноне модернизма вместо декоративных логотипов.
 Избегать: Настройки ради настроек. AI-черновик, выданный за финальный визуал. Брутальный «дикий» язык без проверки на реальном продукте.
 
+## Гаврил Перов — вкус
+<!-- meta: id=PR-perov-taste; tier=A; tags=practitioner,drinkit-product,perov,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/249944147/Drinkit-App-Vision -->
+Ценит:
+- простые минималистичные знаки в духе Logo Modernism; ERA Capital — один из любимых собственных знаков — https://www.linkedin.com/posts/gavrilperov_logotypes-by-gavril-while-im-preparing-activity-7475864284061904897-b6tF
+- бесшовность цифрового и физического продукта — приложение как продолжение кофейни — https://www.linkedin.com/posts/gavrilperov_drinkit-app-whats-next-do-you-remember-activity-7418956656744652800-8zJL
+- персонализация, которая даёт пользу, а не декоративные опции — https://www.behance.net/gallery/249944147/Drinkit-App-Vision
+- глубина, свечение, тени и плотная графика как источник идей — удачные находки смелого концепта переносятся в итоговый — https://www.linkedin.com/posts/gavrilperov_a-concept-too-wild-to-go-live-since-activity-7335384194442813440-27kn
+- открытый процесс: регулярный дизайн-дайджест, общие примеры в Figma, большая насмотренность (6000+ референсов) — https://www.linkedin.com/posts/gavrilperov_inside-drinkits-design-kitchen-most-activity-7459991552367689728-82Fq
+- выразительность держится на сильной структуре (наша интерпретация)
+Отвергает:
+- настройки ради настроек и декоративная персонализация — https://www.behance.net/gallery/249944147/Drinkit-App-Vision
+- выразительность как самоцель, без структуры и пользы (наша интерпретация)
+Не известно (не выдумывать): отвергнутый «дикий» концепт не значит неприязнь к его эстетике; сохранённый пин не равен одобрению приёма
+
 ## Источники
 - Drinkit App Vision (Behance, соавторы Д. Калинина, С. Мекрюков) (тир A): https://www.behance.net/gallery/249944147/Drinkit-App-Vision
 - Behance — портфолио (тир A): https://www.behance.net/gavrilperov

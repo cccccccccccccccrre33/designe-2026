@@ -126,6 +126,18 @@ export class ScriptedProvider implements LlmProvider {
         };
       case 'technicalNote':
         return { question: 'Прогноз готовности', model: 'M/G/c, Монте-Карло (src/science/queueing.ts)', parameters: [{ name: 'sigma', value: 0.25 }], recommendation: 'Показывать интервал P50–P90 в минутах, пересчитывать при изменении очереди.', confidence: 'medium', limits: ['нужна история заказов для калибровки'], sources: ['SRC-DR-ETA'] };
+      case 'autonomyPlan':
+        // Сценарий: первая самостоятельная задача — экран получения у окна; дальше — пропуск.
+        return /Экран получения у окна/.test(user)
+          ? { skip: true, reason: 'главная задача уже сделана, ждём решения владельца', title: '', request: '', why: '' }
+          : { skip: false, title: 'Экран получения у окна', request: 'Главный экран: гость в машине долго ищет привычный напиток — нужен повтор заказа в одно касание и понятное получение у окна.', why: 'Повтор утреннего заказа — главный сценарий водителя; сейчас это самый большой разрыв до уровня Drinkit.', references: ['M-PROOF'] };
+      case 'pitch':
+        return { headline: 'Привычный напиток — в одно касание', story: 'Главная теперь начинается с вашего утреннего напитка: он крупно, в тёплом свете, а повтор — одной кнопкой. Получение у окна видно сразу, без поиска.', question: 'Оставляем тёплый тёмный фон или пробуем светлее?', references: ['M-PROOF', 'НЕСУЩЕСТВУЮЩИЙ'] };
+      case 'studyNotes': {
+        const page = user.match(/### \[WORK\] Текст страницы\n([\s\S]*?)(\n### |$)/)?.[1] ?? '';
+        const quote = page.match(/[^.\n]{20,140}/)?.[0]?.trim() ?? '';
+        return quote ? { relevant: true, likes: [{ text: 'ценит ясную структуру', quote }, { text: 'выдумка', quote: 'этой цитаты на странице нет' }], dislikes: [], methods: [] } : { relevant: false, likes: [], dislikes: [], methods: [] };
+      }
       case 'photoBrief':
         return { subject: 'Флет вайт в керамической чашке', scene: 'ранний свет у окна выдачи', light: 'контровой тёплый', uiZones: 'низ кадра спокойный', prompt: 'flat white in a ceramic cup, warm morning backlight, dark espresso background, soft glow, product photography', negativePrompt: 'text, logo, hands', aspectRatio: '4:5' };
       default:

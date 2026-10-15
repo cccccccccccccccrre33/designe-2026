@@ -10,6 +10,13 @@
     "telegramPollSeconds": 25,
     "finishStepGraceMinutes": 15
   },
+  "autonomy": {
+    "_comment": "Самостоятельная работа: если днём очередь пустая idleMinutes минут, директор студии сам выбирает следующую задачу к цели (приложение уровня Drinkit/amo по вкусу владельца). Одновременно — одна такая задача (следующая — после вашего решения по ней), не больше maxPerDay в день, только при нормальном бюджете и в пределах autonomousMonthlyShare. Выключить — /auto off в Telegram или enabled: false.",
+    "enabled": true,
+    "idleMinutes": 10,
+    "maxPerDay": 3,
+    "minMinutesLeft": 15
+  },
   "retention": {
     "closedArtifactsDays": 3,
     "telegramSeenDays": 7

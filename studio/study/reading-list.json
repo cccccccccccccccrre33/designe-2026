@@ -1,0 +1,95 @@
+{
+  "_comment": "Ссылки владельца для задания study, которых нет среди источников practitioners.json. Читаются как публичные страницы: текст для изучения вкуса и методов, изображения не скачиваются и не используются для обучения.",
+  "practitioners": {
+    "perov": [
+      "https://www.linkedin.com/in/gavrilperov",
+      "https://ru.pinterest.com/gavrilp/",
+      "https://ru.pinterest.com/gavrilp/digital/",
+      "https://t.me/designer2035",
+      "https://www.behance.net/gallery/190490877/ERA-Capital",
+      "https://www.behance.net/gallery/208669823/Mindy",
+      "https://www.behance.net/gallery/197123981/Arny-Praht",
+      "https://www.behance.net/gallery/256716085/Calori-App",
+      "https://www.behance.net/gallery/197467145/Loewe",
+      "https://www.behance.net/gallery/213540349/Selected-Web-Projects-2017-24",
+      "https://www.behance.net/gallery/201023209/Signals",
+      "https://www.behance.net/gallery/147911585/R1-Brand-Identity"
+    ],
+    "kalinina": [
+      "https://www.linkedin.com/in/dariakalinina",
+      "https://www.behance.net/dkalinina/appreciated",
+      "https://dribbble.com/shots/27603651-Food-Combo-in-App-UI-Animation",
+      "https://dribbble.com/shots/27413072-Drinkit-Lab-AI-Drink-Generation",
+      "https://dribbble.com/shots/26778489-Live-Activity-Order-Food-Drinks-Tracking",
+      "https://dribbble.com/shots/27776377-Drinkit-AppStore-Screenshots",
+      "https://www.behance.net/gallery/145434151/Fortu-Wealth-Digital-Private-Banking-App",
+      "https://www.behance.net/gallery/96897525/Rocket-Digital-Design",
+      "https://www.behance.net/gallery/222279437/HR-Pay-Platform",
+      "https://www.behance.net/gallery/72629291/Game-Design",
+      "https://www.behance.net/gallery/67932515/Mozione-Studio-Branding"
+    ],
+    "mekryukov": [
+      "https://www.linkedin.com/in/mekryukov",
+      "https://ru.linkedin.com/posts/mekryukov_%D1%80%D0%BE%D0%B2%D0%BD%D0%BE-%D0%B3%D0%BE%D0%B4-%D0%B2-dodo-brands-%D0%B8-%D1%82%D1%80%D0%B8-%D0%BC%D1%8B%D1%81%D0%BB%D0%B8-%D0%BE-%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD%D0%B5-activity-7264995683789664256-AZFJ",
+      "https://dodoformula.mave.digital/ep-5",
+      "https://horoshodelay.mave.digital/ep-11",
+      "https://youtu.be/lZcBqvwA6SU",
+      "https://soundstream.media/clip/pro-ux-i-product-design-dlya-pmm-s-serezhey-mekryukovym-iz-dodo-brands"
+    ],
+    "gavrina": [
+      "https://www.linkedin.com/in/mariiairi"
+    ],
+    "serova": [
+      "https://www.linkedin.com/in/zhannetta-serova-74b8969b"
+    ],
+    "pesyakova": [
+      "https://www.linkedin.com/in/evgeniya-pesyakova/"
+    ],
+    "priadko": [
+      "https://www.behance.net/tapriadko",
+      "https://priadko.com/food",
+      "https://www.behance.net/gallery/212137625/Social-media-drinkit"
+    ],
+    "kulagina": [
+      "https://www.instagram.com/ssh.klgn/"
+    ],
+    "petrov": [
+      "https://www.petrovvladimir.ru/"
+    ],
+    "sheronova": [
+      "https://www.behance.net/gallery/151095087/portfolio-rezjume",
+      "https://www.behance.net/gallery/137963753/SHOWREEL-2021",
+      "https://www.behance.net/gallery/138146539/Photography-of-recipes-for-web-content"
+    ],
+    "samoylova": [
+      "https://asamoylova.tilda.ws/",
+      "https://t.me/anna_samsa",
+      "https://www.behance.net/gallery/253279433/Dodo-PizzaCommercial-Food-Styling-for-QSR-Campaign"
+    ],
+    "julien-martin": [
+      "https://www.theplaybook.company/",
+      "https://www.theplaybook.company/p/the-review-series-clair-obscur-expedition",
+      "https://www.linkedin.com/posts/martinjulien_news-time-some-of-you-know-this-already-activity-7275872910521597952-NTnT",
+      "https://www.linkedin.com/in/martinjulien"
+    ],
+    "amo-product": [
+      "https://iamnalimov.com/",
+      "https://dribbble.com/iamnalimov",
+      "https://www.linkedin.com/in/iamnalimov",
+      "https://dribbble.com/shots/11411161-Manga-app-redesign",
+      "https://www.linkedin.com/in/ingridma1",
+      "https://www.linkedin.com/posts/ingridma1_on-the-up-and-up-activity-7422301729146277888-0RT4",
+      "https://dribbble.com/sshekhawat",
+      "https://dribbble.com/sshekhawat/about",
+      "https://dribbble.com/shots/2523915-TripAdvisor-iPhone-Search-Redesign-WIP",
+      "https://dribbble.com/shots/2433803-Starbound-Mobile-Site-Concept",
+      "https://www.anagram.club/projects/amo"
+    ],
+    "tententen": [
+      "https://www.behance.net/gallery/176482595/Drinkit-coffee-shop"
+    ],
+    "orlov": [
+      "https://t.me/orlovsdev"
+    ]
+  }
+}

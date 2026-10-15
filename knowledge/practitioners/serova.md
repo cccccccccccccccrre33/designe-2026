@@ -15,6 +15,12 @@ Dodo Pizza · Продуктовый дизайнер: киоски и моби�
 Планка: Единство между точками контакта.
 Избегать: Отдельный стиль для каждого устройства.
 
+## Жаннетта Серова — вкус
+<!-- meta: id=PR-serova-taste; tier=A; tags=practitioner,dodo-product,serova,taste; kind=practitioner; rights=public-reference-only; url=https://ru.linkedin.com/posts/zhannetta-serova-74b8969b_%D0%BC%D0%B0%D0%BA%D0%B5%D1%82%D1%8B-%D0%BA%D0%B8%D0%BE%D1%81%D0%BA%D0%BE%D0%B2-dodo-pizza-%D0%B2-figma-community-activity-7270450936567812097-NnOk -->
+Ценит:
+- единая визуальная система через киоск и приложение (наша интерпретация)
+Не известно (не выдумывать): публичных разборов предпочтений мало
+
 ## Источники
 - Макеты киосков Dodo Pizza в Figma Community (тир A): https://ru.linkedin.com/posts/zhannetta-serova-74b8969b_%D0%BC%D0%B0%D0%BA%D0%B5%D1%82%D1%8B-%D0%BA%D0%B8%D0%BE%D1%81%D0%BA%D0%BE%D0%B2-dodo-pizza-%D0%B2-figma-community-activity-7270450936567812097-NnOk
 

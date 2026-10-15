@@ -17,6 +17,12 @@ Drinkit (контент-продакшн) · Фотограф предметно
 Планка: Слоистость и фактура напитка видны.
 Избегать: Шаблонный ракурс без учёта формы стакана.
 
+## Владимир Петров — вкус
+<!-- meta: id=PR-petrov-taste; tier=A; tags=practitioner,drinkit-content,petrov,taste; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/petrovvladimir -->
+Ценит:
+- фотореализм света, стекла и жидкости; оптика меняется от проекта к проекту (наша интерпретация)
+Не известно (не выдумывать): личных высказываний о любимой оптике и запретах в свете нет — не выдумывать
+
 ## Источники
 - Behance (тир A): https://www.behance.net/petrovvladimir
 - Summer Menu: Photo & Video (тир A): https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit

@@ -108,6 +108,10 @@ export class KnowledgeBase {
     this.avgLen = this.lengths.reduce((a, b) => a + b, 0) / Math.max(1, this.lengths.length);
   }
 
+  get(id: string): Chunk | undefined {
+    return this.chunks.find((c) => c.id === id);
+  }
+
   search(query: string, opts: SearchOptions = {}): Array<Chunk & { score: number }> {
     const k1 = 1.4;
     const b = 0.75;

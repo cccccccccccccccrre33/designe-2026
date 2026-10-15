@@ -80,7 +80,7 @@ export async function createApp(opts: AppOptions): Promise<App> {
   const practitioners = await PractitionerBook.load(join(repoRoot, 'studio/org/practitioners.json'));
   const schoolErrors = practitioners.validate(new Set(roles.all().map((r) => r.id)));
   if (schoolErrors.length) throw new Error(`studio/org/practitioners.json:\n${schoolErrors.join('\n')}`);
-  const kb = await KnowledgeBase.load(repoRoot, ['knowledge/sources', 'knowledge/methods', 'knowledge/practitioners', 'product/space']);
+  const kb = await KnowledgeBase.load(repoRoot, ['knowledge/sources', 'knowledge/methods', 'knowledge/practitioners', 'knowledge/study', 'product/space']);
   const prefs = new PreferenceRegistry(repoRoot, clock);
   const notes = new RoleNotes(store, clock);
   const renderer = opts.renderer ?? new ScreenRenderer(config.tokens, join(repoRoot, 'design-system'));
