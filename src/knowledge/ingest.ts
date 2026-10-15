@@ -3,6 +3,7 @@
 // после проверки авторства — это защищает от смешения фанатских концептов с
 // работами команд (раздел VII исследования).
 
+import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -39,7 +40,9 @@ export async function ingestLinkArchive(repoRoot: string, file: string): Promise
     }
     out.push('');
   }
-  const path = join(repoRoot, 'knowledge/sources', `inbox-${date}.md`);
-  await writeFile(path, out.join('\n'), 'utf8');
+  // Второй архив за тот же день не затирает первый: inbox-<дата>-2.md, -3.md…
+  let path = join(repoRoot, 'knowledge/sources', `inbox-${date}.md`);
+  for (let n = 2; existsSync(path); n++) path = join(repoRoot, 'knowledge/sources', `inbox-${date}-${n}.md`);
+  await writeFile(path, out.join('\n'), { encoding: 'utf8', flag: 'wx' });
   return { path, count };
 }

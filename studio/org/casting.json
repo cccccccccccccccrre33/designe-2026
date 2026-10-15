@@ -5,7 +5,7 @@
       "positions": ["creative-director", "senior-product-designer", "beverage-art-director", "ux-quality-reviewer", "motion-designer"],
       "author": "senior-product-designer",
       "photo": "beverage-art-director",
-      "photoLenses": ["set-designer", "food-stylist", "color-lighting-artist", "product-photographer"],
+      "photoLenses": ["set-designer", "food-stylist", "product-photographer", "color-lighting-artist"],
       "motion": "motion-designer",
       "critics": ["ux-quality-reviewer", "creative-director", "beverage-art-director"],
       "director": "studio-director"
@@ -20,12 +20,13 @@
       "director": "studio-director"
     },
     "drink-visuals": {
-      "positions": ["creative-director", "beverage-art-director", "senior-product-designer"],
+      "_comment": "Фото- и видеокарточки меню: экипаж продакшена (как в титрах дропов Drinkit и съёмок Dodo). Критики — стилист (физика напитка), DoP (свет и оптика), креативный директор.",
+      "positions": ["beverage-art-director", "set-designer", "food-stylist", "product-photographer", "video-motion-art-director"],
       "author": "senior-product-designer",
       "photo": "beverage-art-director",
-      "photoLenses": ["set-designer", "food-stylist", "color-lighting-artist", "product-photographer", "retouching-specialist"],
-      "motion": null,
-      "critics": ["creative-director", "ux-quality-reviewer"],
+      "photoLenses": ["set-designer", "food-stylist", "product-photographer", "color-lighting-artist", "retouching-specialist", "media-production-lead"],
+      "motion": "video-motion-art-director",
+      "critics": ["food-stylist", "product-photographer", "creative-director"],
       "director": "studio-director"
     },
     "motion-transition": {
@@ -44,7 +45,9 @@
     "waiting": { "consult": ["advisor-queueing", "advisor-cognition-hci"] },
     "glass": { "consult": ["advisor-perception"] },
     "pickup": { "addPositions": ["advisor-space-ergonomics"], "consult": ["advisor-space-ergonomics"] },
-    "payment": { "addPositions": ["ux-quality-reviewer"] }
+    "payment": { "addPositions": ["ux-quality-reviewer"] },
+    "photo": { "addPositions": ["food-stylist", "product-photographer"] },
+    "video": { "addPositions": ["video-motion-art-director"] }
   },
   "limits": { "maxPositions": 5, "maxCritics": 3, "maxConsults": 2 }
 }

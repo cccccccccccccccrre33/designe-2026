@@ -264,6 +264,8 @@
         { "title": "drinks for DRINKIT", "url": "https://www.behance.net/gallery/196170111/drinks-for-DRINKIT", "tier": "A" },
         { "title": "Spring Drink Collection", "url": "https://www.behance.net/gallery/223709781/Spring-Drink-Collection-Set-Design-Visual-Story", "tier": "A" },
         { "title": "Autumn Menu: Photo & Video", "url": "https://www.behance.net/gallery/212138193/Autumn-Menu-Photo-Video-for-Drinkit", "tier": "A" },
+        { "title": "New Year Drink Set Design & Ad Shoot", "url": "https://www.behance.net/gallery/212889515/New-Year-Drink-Set-Design-Ad-Shoot", "tier": "A" },
+        { "title": "Moving image (сайт)", "url": "https://priadko.com/moving-image", "tier": "A" },
         { "title": "The Magical Halloween Mood", "url": "https://www.behance.net/gallery/212157347/Drink-Set-Design-The-Magical-Halloween-Mood", "tier": "A" },
         { "title": "Сайт", "url": "https://priadko.com", "tier": "A" }
       ],
@@ -276,6 +278,9 @@
         { "id": "SET-LAYERED-SCENES", "title": "Многослойные сцены и мобили", "rule": "Многоплановые декорации (горы, озеро, круг солнца), самодельные мобили, медленно движущееся небо в видео; руки модели — как будто гость уже пробует.", "apply": "Видеопетли карточек: одно медленное движение в фоне, напиток статичен.", "basis": "source" },
         { "id": "SET-SUBTLE-OCCASION", "title": "Праздник через символы", "rule": "Сезон и праздник — через созданный мир и нюансы (пряничный городок, каток, бенгальские огни), а не через стандартные атрибуты.", "apply": "Новогодний дроп DRIVE&KAVA — «зимова траса» в миниатюре вместо ёлки и шаров.", "basis": "source" },
         { "id": "SET-NO-SCARY", "title": "Настроение без пугающего", "rule": "Хеллоуин без ведьм, пауков и жути: глубокие тени, мягкое свечение, немного магии; иллюзия исчезновения и появления, напиток «сам» закручивается, ложка «сама» пробует мусс; для айс-версии — ледяные блоки с гранатом внутри как отсылка к вкусу.", "apply": "Сезонные поводы DRIVE&KAVA — через свет и одну магическую деталь; айс-версии — лёд с ингредиентом внутри, без пугающих и дешёвых атрибутов.", "basis": "source" },
+        { "id": "SET-PEDESTAL-SCULPTURE", "title": "Напиток на скульптурной подставке", "rule": "Летнее меню: стакан стоит на стеклянной сфере или на завитке плотной карамельной бумаги; вокруг — стеклянные шарики; вся сцена в одной тёплой палитре напитка, глянцевая поверхность даёт отражения.", "apply": "Карточка напитка DRIVE&KAVA: одна скульптурная подставка из материала, рифмующегося со вкусом (карамельная бумага для Cloud Caramel, матовое стекло для Айс Тоніка), фон — тон напитка.", "basis": "visual" },
+        { "id": "SET-DRINK-AS-DECOR", "title": "Напиток сам становится украшением", "rule": "Новогодний дроп: напитки поставлены так, будто они часть праздничного декора — рядом с подарками, под конструкцией из бенгальских огней; яблоки для «Яблочного пирога» покрыты золотом, разлёт золотых искр даёт глубину и движение.", "apply": "Сезонные карточки DRIVE&KAVA: напиток — главный предмет праздника, реквизит усиливает один его вкус (золото на ингредиенте, а не мишура вокруг).", "basis": "source" },
+        { "id": "SET-MOVING-PROP", "title": "Движется реквизит, а не напиток", "rule": "Moving image Прядко: пряничный человечек на карусели, лепестки, которые несёт ветер; напиток в кадре спокоен, движение — в декорации.", "apply": "Видеокарточка DRIVE&KAVA: одно движение в сцене (вращение подставки, падающие лепестки, пар), стакан неподвижен.", "basis": "source" },
         { "id": "SET-MULTI-CHANNEL", "title": "Одна съёмка — все носители", "rule": "Осеннее меню снято и адаптировано сразу для соцсетей, мобильного приложения и ТВ-табло.", "apply": "Кадр строится с запасом под 4:5 и 9:16 в приложении и под табло меню под окном выдачи.", "basis": "source" }
       ],
       "method": ["Анализ айдентики бренда → ключевые направления сцены.", "Симметрия, плавные линии, цветовая гармония в серии.", "Работает со своим экипажем: ассистент сет-дизайнера (Саша Кулагина), фуд-стайлинг, фото, ретушь, продюсер."],
@@ -291,12 +296,14 @@
       "sources": [
         { "title": "Behance", "url": "https://www.behance.net/petrovvladimir", "tier": "A" },
         { "title": "Summer Menu: Photo & Video", "url": "https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit", "tier": "A" },
-        { "title": "drinks for DRINKIT", "url": "https://www.behance.net/gallery/196170111/drinks-for-DRINKIT", "tier": "A" }
+        { "title": "drinks for DRINKIT", "url": "https://www.behance.net/gallery/196170111/drinks-for-DRINKIT", "tier": "A" },
+        { "title": "Commercial Beverage Styling (Dodo, соавтор)", "url": "https://www.behance.net/gallery/222903499/Commercial-Beverage-Styling", "tier": "A" }
       ],
       "signatures": [
         { "id": "PHO-CENTERED-HERO", "title": "Напиток в центре, вертикальный кадр", "rule": "Стакан по центру, вертикальные кадры, щедрое свободное поле, ракурс от уровня стола до глаз.", "apply": "Фото-бриф: 4:5 для карточек, 9:16 для героя главной, зона под интерфейс сверху и снизу.", "basis": "visual" },
         { "id": "PHO-SOFT-LIGHT", "title": "Мягкий свет и блики на стекле", "rule": "Мягкий рассеянный свет подчёркивает нежность напитка; блики и отражения работают на стекло и лёд.", "apply": "Схема света с контровым на стекле; без жёстких теней под интерфейсом.", "basis": "source" },
-        { "id": "PHO-SLOW-MOTION", "title": "Медленное видео", "rule": "Видео — плавное медленное движение (лепестки, небо, ткань), камера почти неподвижна.", "apply": "Видеопетли для карточек напитков.", "basis": "source" }
+        { "id": "PHO-SLOW-MOTION", "title": "Медленное видео", "rule": "Видео — плавное медленное движение (лепестки, небо, ткань), камера почти неподвижна.", "apply": "Видеопетли для карточек напитков.", "basis": "source" },
+        { "id": "PHO-MIXING-MOMENT", "title": "Момент смешивания", "rule": "Айс-латте снят в момент, когда эспрессо закручивается облаками в молоке — граница слоёв живая, видна сквозь прозрачное стекло.", "apply": "Айс Лате и Айс Тонік DRIVE&KAVA: кадр в момент, когда кофе ещё не смешался — видны «облака» эспрессо, а не однородная коричневая жидкость.", "basis": "visual" }
       ],
       "method": ["Работа одной командой с сет-дизайнером и фуд-стайлистом."],
       "qualityBar": ["Слоистость и фактура напитка видны."],
@@ -311,10 +318,13 @@
       "sources": [
         { "title": "Behance — портфолио", "url": "https://www.behance.net/sashakulagina", "tier": "A" },
         { "title": "Drinkit New Year's Drop (фото/видео В. Петров, фуд-стайлинг К. Низова)", "url": "https://www.behance.net/gallery/241601991/Drinkit-New-Years-Drop", "tier": "A" },
-        { "title": "Drinkit Halloween drop (фото/видео В. Петров, фуд-стайлинг К. Шеронова)", "url": "https://www.behance.net/gallery/238343035/Drinkit-Halloween-drop", "tier": "A" }
+        { "title": "Drinkit Halloween drop (фото/видео В. Петров, фуд-стайлинг К. Шеронова)", "url": "https://www.behance.net/gallery/238343035/Drinkit-Halloween-drop", "tier": "A" },
+        { "title": "silicone and plastic — материальные эксперименты", "url": "https://www.behance.net/gallery/224306931/silicone-and-plastic", "tier": "A" },
+        { "title": "Drinkit x collaborations (сет-дизайн)", "url": "https://www.behance.net/gallery/247665351/Drinkit-x-collaborations", "tier": "A" }
       ],
       "signatures": [
         { "id": "KUL-GIANT-EVERYDAY", "title": "Бытовой предмет в гигантском масштабе", "rule": "Новогодний дроп: огромная гофрированная бумажная форма для кекса становится декорацией за стаканом, фон — тёплое золотое боке; знакомый предмет кухни, увеличенный до размера сцены, даёт праздник без ёлочных атрибутов.", "apply": "Сезонная сцена DRIVE&KAVA строится вокруг одного увеличенного предмета дороги или кофейни (стакан-подстаканник, бумажный пакет выдачи) и тёплого боке огней у окна.", "basis": "visual" },
+        { "id": "KUL-MATERIAL-STUDY", "title": "Материал как исследование", "rule": "Отдельные съёмочные эксперименты с силиконом и пластиком: свойства материала (прозрачность, тягучесть, блеск) изучаются до того, как попасть в сцену.", "apply": "Сцена DRIVE&KAVA называет материал и его физику (матовое стекло, воск, силикон, бумага), а не «красивый фон» — так генерация не выглядит типичной AI-картинкой.", "basis": "source" },
         { "id": "KUL-FLAVOR-LINES", "title": "Дроп — линейки вкуса и закулисье", "rule": "Новогодний дроп разложен на линейки по вкусу (пряник, вишня, черника), у каждой свой набор кадров, плюс отдельный блок «за кадром».", "apply": "Дроп DRIVE&KAVA в приложении — 2–3 линейки вкуса со своими цветами сцены (PREF-003) и короткое «за лаштунками» с бариста у окна.", "basis": "source" }
       ],
       "method": ["Путь внутри постоянного экипажа: от ассистента ведущего сет-дизайнера к своим дропам с тем же фотографом."],
@@ -357,6 +367,69 @@
       "qualityBar": ["Нет артефактов на 100% масштабе."],
       "avoid": ["Пластиковая ретушь."],
       "confidence": "Роль подтверждена титрами; стилевые признаки выведены из серий."
+    },
+    {
+      "id": "samoylova",
+      "name": "Анна Самойлова",
+      "org": "Dodo Brands (Dodo Pizza Россия и международные рынки)",
+      "role": "Фуд- и бевередж-стилист; на международных съёмках — ещё и контроль качества продукта и координация продакшена",
+      "school": "dodo-content",
+      "sources": [
+        { "title": "Dodo Pizza Summer Drinks Campaign (2026)", "url": "https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign", "tier": "A" },
+        { "title": "Commercial Beverage Styling (Dodo)", "url": "https://www.behance.net/gallery/222903499/Commercial-Beverage-Styling", "tier": "A" },
+        { "title": "International Food Styling for Dodo Pizza Global", "url": "https://www.behance.net/gallery/231597743/International-Food-Styling-for-Dodo-Pizza-Global", "tier": "A" },
+        { "title": "Behance — портфолио", "url": "https://www.behance.net/a_samsa", "tier": "A" }
+      ],
+      "signatures": [
+        { "id": "SAM-REAL-ICE", "title": "Настоящая прохлада настоящим льдом", "rule": "Летние напитки Dodo: чтобы передать настоящую прохладу, вместо искусственного реквизита или AI использованы крупные блоки натурального льда; стакан стоит прямо на прозрачном ледяном блоке.", "apply": "Айс-напитки и лимонады DRIVE&KAVA генерируются с льдом по законам настоящего льда (стандарт beverage-physics): прозрачные блоки с внутренними трещинами и мутной сердцевиной, кубики выше края стакана, талая вода внизу — не «стеклянные» ровные кубы.", "basis": "source" },
+        { "id": "SAM-COLD-CUP", "title": "Холодный стакан навынос", "rule": "Прозрачный пластиковый стакан навынос целиком покрыт крупными каплями конденсата, лёд горкой выше края, цвет напитка насыщенный, цветная трубочка — единственный диагональный акцент, фон — ровное небесно-голубое поле, камера чуть ниже края стакана.", "apply": "Карточки лимонадов и холодных напитков DRIVE&KAVA: стакан навынос (как в окне драйва), конденсат и лёд по физике, фон — свой цвет у каждого напитка (PREF-003), а не один голубой на всех.", "basis": "visual" },
+        { "id": "SAM-EDIBLE-TRUTH", "title": "Только настоящее и съедобное", "rule": "Вся еда на съёмке приготовлена из настоящих ингредиентов и остаётся съедобной; стилист контролирует качество продукта во время съёмки.", "apply": "Сгенерированный напиток повторяет рецепт меню: никаких ингредиентов и украшений, которых бариста не положит.", "basis": "source" },
+        { "id": "SAM-ONE-SHOOT-ALL-CHANNELS", "title": "Одна съёмка — меню, доставка, реклама", "rule": "Летняя линейка снята сразу для меню ресторанов, платформ доставки и рекламной кампании.", "apply": "Каждая карточка DRIVE&KAVA сразу в форматах приложения (4:5, 9:16), меню-борда у окна и соцсетей — без пересъёмки.", "basis": "source" }
+      ],
+      "method": ["Стилинг под задачу рынка: акцент на главном физическом качестве продукта (воздушный борт, глянцевый соус).", "Координация визуального продакшена как продакт-менеджер."],
+      "qualityBar": ["Продукт в кадре равен продукту на кассе."],
+      "avoid": ["Искусственный реквизит вместо физики прохлады.", "Украшения, которых нет в рецепте."]
+    },
+    {
+      "id": "dodo-beverage-photo",
+      "name": "Фотографы напитков Dodo (Д. Дёмин, К. Семёнов)",
+      "org": "Dodo Brands",
+      "role": "Коммерческая предметная съёмка напитков и ключевых визуалов запусков",
+      "school": "dodo-content",
+      "sources": [
+        { "title": "Dodo Pizza Summer Drinks Campaign (фото Д. Дёмин)", "url": "https://www.behance.net/gallery/242627857/Dodo-PizzaSummer-Drinks-Campaign", "tier": "A" },
+        { "title": "International Food Styling for Dodo Pizza Global (фото К. Семёнов, Д. Дёмин)", "url": "https://www.behance.net/gallery/231597743/International-Food-Styling-for-Dodo-Pizza-Global", "tier": "A" },
+        { "title": "Daniil Demin — Behance", "url": "https://www.behance.net/DaniilDemin", "tier": "A" },
+        { "title": "Konstantin Semenov — Behance", "url": "https://www.behance.net/jbm1606", "tier": "A" }
+      ],
+      "signatures": [
+        { "id": "DEM-LOW-HERO", "title": "Низкая точка — стакан-герой", "rule": "Камера чуть ниже края стакана, стакан занимает почти весь кадр, свет ровный и яркий, фон бесшовный; прозрачность пластика, лёд и капли читаются за счёт контрового света.", "apply": "Ракурс серии холодных напитков DRIVE&KAVA: чуть ниже края, стакан крупно, контровой свет через жидкость и конденсат.", "basis": "visual" },
+        { "id": "DEM-DEFINING-QUALITY", "title": "Одно определяющее качество продукта", "rule": "Ключевой визуал запуска подчёркивает одно физическое качество продукта: воздушный борт римской пиццы, глянец соуса терияки, тянущийся сыр.", "apply": "Для каждого напитка DRIVE&KAVA DoP называет одно качество, которое кадр обязан показать: крема эспрессо, плотность пены капучино, пузырьки тоника, тягучесть горячего шоколада.", "basis": "source" }
+      ],
+      "method": ["Серия под запуск в нескольких странах в одном визуальном стандарте."],
+      "qualityBar": ["Кадр продаёт продукт в меню и доставке, а не только в рекламе."],
+      "avoid": ["Кадр, где продукт теряется в сцене."]
+    },
+    {
+      "id": "dodo-video-production",
+      "name": "Видеопродакшены Dodo (1:30 Studio, FAZA, Yep! Agency)",
+      "org": "Внешние студии для Dodo Pizza",
+      "role": "Motion-видео приложения и рекламные ролики с едой: режиссура, операторская работа, художник-постановщик, фуд-стилинг, монтаж, CGI",
+      "school": "dodo-content",
+      "sources": [
+        { "title": "Demo video for Dodo Pizza 2024 (1:30 Studio)", "url": "https://www.behance.net/gallery/216817543/Demo-video-for-Dodo-Pizza-2024", "tier": "A" },
+        { "title": "1:30 Studio", "url": "https://www.130studio.com/", "tier": "B" },
+        { "title": "FAZA — Dodo Pizza «AAAAA» (титры)", "url": "https://kino-faza.ru/portfolio/dodo-pizza-aaaaa/", "tier": "B" },
+        { "title": "Yep! Agency — Dodo Pizza «Мы рядом» (титры)", "url": "https://yepagency.ru/dodo-pizza-we-are-here", "tier": "B" }
+      ],
+      "signatures": [
+        { "id": "VID-APP-SHOWREEL", "title": "Годовой шоурил приложения", "rule": "Ежегодное динамичное видео обо всех обновлениях приложения за год: 2D/3D-анимация, еда и анимация интерфейса в одном ролике с вау-эффектом.", "apply": "Видео-демо приложения DRIVE&KAVA: экраны и карточки напитков в одном ритме, напиток из карточки «выходит» из экрана.", "basis": "source" },
+        { "id": "VID-CREW-SPLIT", "title": "Видеопродакшен — система специалистов", "rule": "В рекламных роликах Dodo роли разделены: режиссёр, оператор-постановщик, художник-постановщик, фуд-стилисты, монтаж, CGI.", "apply": "Beverage Motion Director раскладывает видеокарточку на задачи этих ролей (движение камеры, сцена, напиток, склейка), а не пишет один общий промпт.", "basis": "source" }
+      ],
+      "method": ["Ролик собирается как совместная работа отдельных цехов."],
+      "qualityBar": ["Ролик держит внимание без звука."],
+      "avoid": ["Один универсальный «видеограф», который делает всё."],
+      "confidence": "Кейс 1:30 Studio прочитан на Behance; страницы FAZA и Yep! в этой сессии не открылись — состав ролей взят из исследования владельца (тир B)."
     },
     {
       "id": "tententen",
@@ -752,18 +825,21 @@
     "beverage-art-director": [
       { "practitioner": "pesyakova", "weight": "primary" },
       { "practitioner": "priadko", "weight": "primary" },
-      { "practitioner": "perov", "weight": "secondary", "signatures": ["PEROV-WARM-IMMERSIVE", "PEROV-AI-COLLAGE", "PEROV-BEYOND-FRAME"] }
+      { "practitioner": "perov", "weight": "secondary", "signatures": ["PEROV-WARM-IMMERSIVE", "PEROV-AI-COLLAGE", "PEROV-BEYOND-FRAME"] },
+      { "practitioner": "samoylova", "weight": "secondary", "signatures": ["SAM-REAL-ICE", "SAM-COLD-CUP"] }
     ],
     "product-photographer": [
-      { "practitioner": "petrov", "weight": "primary" }
+      { "practitioner": "petrov", "weight": "primary" },
+      { "practitioner": "dodo-beverage-photo", "weight": "primary" }
     ],
     "set-designer": [
       { "practitioner": "priadko", "weight": "primary" },
-      { "practitioner": "kulagina", "weight": "secondary", "signatures": ["KUL-GIANT-EVERYDAY", "KUL-FLAVOR-LINES"] },
+      { "practitioner": "kulagina", "weight": "secondary", "signatures": ["KUL-GIANT-EVERYDAY", "KUL-FLAVOR-LINES", "KUL-MATERIAL-STUDY"] },
       { "practitioner": "pentagram-bottega", "weight": "secondary", "signatures": ["PB-DAYLIGHT"] }
     ],
     "food-stylist": [
-      { "practitioner": "sheronova", "weight": "primary" }
+      { "practitioner": "sheronova", "weight": "primary" },
+      { "practitioner": "samoylova", "weight": "primary" }
     ],
     "color-lighting-artist": [
       { "practitioner": "priadko", "weight": "primary", "signatures": ["SET-NEON-BACK", "SET-TEMPERATURE", "SET-COLOR-WORLD"] },
@@ -778,11 +854,18 @@
     ],
     "ai-image-production": [
       { "practitioner": "perov", "weight": "primary", "signatures": ["PEROV-AI-COLLAGE"] },
-      { "practitioner": "pesyakova", "weight": "secondary", "signatures": ["CNT-AI-CONTENT"] }
+      { "practitioner": "pesyakova", "weight": "secondary", "signatures": ["CNT-AI-CONTENT"] },
+      { "practitioner": "samoylova", "weight": "secondary", "signatures": ["SAM-EDIBLE-TRUTH"] }
+    ],
+    "media-production-lead": [
+      { "practitioner": "pesyakova", "weight": "primary", "signatures": ["CNT-STABLE-CREW", "CNT-ONE-DAY-FOUR-SETS", "CNT-FREEDOM-OVER-BRIEF"] },
+      { "practitioner": "samoylova", "weight": "secondary", "signatures": ["SAM-ONE-SHOOT-ALL-CHANNELS"] },
+      { "practitioner": "priadko", "weight": "secondary", "signatures": ["SET-MULTI-CHANNEL"] }
     ],
     "video-motion-art-director": [
-      { "practitioner": "priadko", "weight": "primary", "signatures": ["SET-LAYERED-SCENES", "SET-MULTI-CHANNEL"] },
-      { "practitioner": "petrov", "weight": "primary", "signatures": ["PHO-SLOW-MOTION"] },
+      { "practitioner": "priadko", "weight": "primary", "signatures": ["SET-LAYERED-SCENES", "SET-MULTI-CHANNEL", "SET-MOVING-PROP"] },
+      { "practitioner": "petrov", "weight": "primary", "signatures": ["PHO-SLOW-MOTION", "PHO-MIXING-MOMENT"] },
+      { "practitioner": "dodo-video-production", "weight": "secondary", "signatures": ["VID-CREW-SPLIT", "VID-APP-SHOWREEL"] },
       { "practitioner": "porto-rocha", "weight": "secondary", "signatures": ["PR-FULL-BLEED"] }
     ],
     "motion-designer": [

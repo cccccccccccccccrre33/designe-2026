@@ -36,8 +36,12 @@ export interface CatalogItem {
   cat: string;
   name: string;
   sub: string;
-  sizes: Array<[string, number]>;
+  /** [обʼєм, ціна]; ціна null — владелец ещё не назвал, обʼєм "" — не указан. */
+  sizes: Array<[string, number | null]>;
   mode: 'ice' | 'milk';
+  /** Как напиток выглядит физически — опора для фуд-стилиста и генерации (status: standard | hypothesis). */
+  look?: { status: 'standard' | 'hypothesis'; base: string; layers: string; ice: string; garnish: string; vessel: string };
+  note?: string;
 }
 
 export interface StudioConfig {
@@ -63,7 +67,7 @@ export async function loadConfig(repoRoot: string): Promise<StudioConfig> {
     casting: await json(join(repoRoot, 'studio/org/casting.json')),
     rubric: await json(join(repoRoot, 'studio/org/rubric.json')),
     tokens: await json(join(repoRoot, 'design-system/tokens.json')),
-    catalog: await json(join(repoRoot, 'product/catalog.v82.json')),
+    catalog: await json(join(repoRoot, 'product/catalog.v83.json')),
     principles: (await json<{ principles: StudioConfig['principles'] }>(join(repoRoot, 'design-system/principles.json'))).principles,
   };
 }

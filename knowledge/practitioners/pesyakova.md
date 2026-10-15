@@ -27,4 +27,4 @@ Drinkit · Creative Director контента Drinkit больше четырё�
 - Layering Drop: два латте (тир A): https://www.linkedin.com/posts/evgeniya-pesyakova_layering-drop-for-it-coffee-shop-drinkit-activity-7125231496579198977-StWh
 - Итоги работы Creative Director в Drinkit (тир A): https://www.linkedin.com/posts/evgeniya-pesyakova_bye-bye-drinkit-my-journey-as-creative-activity-7492478621664870400-k-6T
 
-Роли студии, работающие в этой школе: creative-director, beverage-art-director, ai-image-production
+Роли студии, работающие в этой школе: creative-director, beverage-art-director, ai-image-production, media-production-lead

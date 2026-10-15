@@ -431,13 +431,15 @@ export class Studio {
     const knowledge = this.d.kb.search(`${ini.problem} ${ini.screen} ${ini.tags.join(' ')}`, { k: 6 });
     const space = this.windowRelated(ini) ? await this.spaceDoc() : null;
     const cats = new Map<string, string[]>();
-    for (const item of this.d.catalog) cats.set(item.cat, [...(cats.get(item.cat) ?? []), `${item.name}${item.sizes[0] ? ` ${item.sizes[0][1]} ₴` : ''}`]);
+    // Цена только та, что назвал владелец; без цены — без цифры, а не «null ₴».
+    const price = (item: CatalogItem) => item.sizes.filter(([, p]) => p !== null).map(([v, p]) => `${v ? `${v} ` : ''}${p} ₴`).join(' / ');
+    for (const item of this.d.catalog) cats.set(item.cat, [...(cats.get(item.cat) ?? []), `${item.name}${price(item) ? ` ${price(item)}` : ''}`]);
     return {
       sections: [
         { label: 'STANDARD', title: 'Продукт DRIVE&KAVA', body: await this.product() },
         { label: 'OWNER PREFERENCES', title: 'Предпочтения владельца (обязательны)', body: prefs.map((p) => `${p.id} [${p.strength}] ${p.statement}`).join('\n') },
         { label: 'STANDARD', title: 'Принципы бренда', body: this.d.principles.map((p) => `${p.id} ${p.title}: ${p.rule}`).join('\n') },
-        { label: 'STANDARD', title: 'Меню (снимок v82)', body: [...cats].map(([c, items]) => `${c}: ${items.join(', ')}`).join('\n') },
+        { label: 'STANDARD', title: 'Меню (v83, цены — только названные владельцем)', body: [...cats].map(([c, items]) => `${c}: ${items.join(', ')}`).join('\n') },
         { label: 'STANDARD', title: 'Утверждённые решения по этому экрану', body: sameScreen.map((d) => `${d.title}: ${d.summary}`).join('\n') },
         { label: 'REJECTED', title: 'Отклонено владельцем раньше — не повторять', body: rejected.slice(-5).map((d) => `${d.title}: ${d.reason ?? 'без причины'}`).join('\n') },
         ...(space ? [{ label: 'STANDARD' as const, title: SPACE_TITLE, body: space }] : []),
@@ -592,10 +594,13 @@ export class Studio {
       const hero = findHero(v.spec);
       if (hero?.frame?.w && hero.frame.h) {
         const lenses = cast.photoLenses.filter((r) => this.d.roles.has(r)).map((r) => this.d.roles.get(r));
-        const brief = await this.callAgent<PhotoOut>(ini, this.d.roles.get(cast.photo), 'spec', 'photoBrief', photoBriefSchema, [
-          { label: 'TASK', title: 'Фото-бриф под экран', body: `Напиток-герой: ${hero.drink?.name ?? hero.label ?? 'напиток'}. Рамка героя ${hero.frame.w}×${hero.frame.h} pt. UI-зоны — всё вне зоны героя на экране.\nПроблема экрана: ${problem}\nСекции брифа учитывают линзы: ${lenses.map((l) => `${l.title}: ${l.decisionMethod}`).join(' | ')}` },
+        const drinkName = hero.drink?.name ?? hero.label ?? 'напиток';
+        const brief = await this.callAgent<PhotoOut>(ini, this.d.roles.get(cast.photo), 'photo', 'photoBrief', photoBriefSchema, [
+          { label: 'TASK', title: 'Фото-бриф под экран', body: `Напиток-герой: ${drinkName}. Рамка героя ${hero.frame.w}×${hero.frame.h} pt. UI-зоны — всё вне зоны героя на экране (изображение экрана приложено).\nПроблема экрана: ${problem}\nСекции брифа учитывают линзы: ${lenses.map((l) => `${l.title}: ${l.decisionMethod}`).join(' | ')}\nПромпт генерации обязан описать физику напитка по стандарту ниже: лёд, конденсат, пену, слои, свет — иначе генерация выглядит ненастоящей.` },
+          { label: 'STANDARD', title: 'Как выглядит этот напиток (каталог меню)', body: drinkTruth(this.d.catalog, drinkName) },
+          { label: 'STANDARD', title: 'Физика напитка в кадре', body: formatForPrompt(this.d.kb.search(`физика ${drinkName} лёд конденсат пена слои стакан свет`, { k: 4, tags: ['physics'] })) },
           { label: 'WORK', title: 'Спецификация экрана', body: JSON.stringify(v.spec) },
-        ], { maxTokens: 1500 });
+        ], { maxTokens: 1500, images: [{ format: 'png', base64: (await readFile(v.preview)).toString('base64'), label: 'экран, под который пишется фото' }] });
         const asset = await this.d.images.generate({ initiativeId: ini.id, autonomous: ini.source === 'autonomous', prompt: brief.value.prompt, negativePrompt: brief.value.negativePrompt, aspectRatio: nearestAspect(hero.frame.w, hero.frame.h), final: true });
         const spec = structuredClone(v.spec);
         walk(spec.nodes, (n) => { if (n.id === hero.id) { n.kind = 'image'; n.asset = asset.assetId; n.fit = 'cover'; delete n.drink; } });
@@ -887,6 +892,21 @@ function similarity(a: string, b: string): number {
   let inter = 0;
   for (const t of x) if (y.has(t)) inter++;
   return inter / Math.min(x.size, y.size);
+}
+
+/** Описание напитка для фото-брифа: из каталога меню; неподтверждённое помечается. */
+export function drinkTruth(catalog: CatalogItem[], name: string): string {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-zа-яіїєґ0-9]/gi, '');
+  const item = catalog.find((c) => norm(c.name) === norm(name)) ?? catalog.find((c) => norm(name).includes(norm(c.name)) || norm(c.name).includes(norm(name)));
+  if (!item) return `«${name}» нет в меню v83 — описать по стандартному рецепту и пометить как непроверенное.`;
+  const sizes = item.sizes.map(([v, p]) => `${v || 'обʼєм не вказаний'}${p !== null ? ` — ${p} ₴` : ''}`).join(', ') || 'обʼєм і ціна не вказані';
+  const l = item.look;
+  if (!l) return `${item.name} (${item.cat}): ${sizes}. Внешний вид не описан.`;
+  return [
+    `${item.name} (${item.cat}, ${item.mode === 'ice' ? 'холодный, со льдом' : 'горячий'}): ${sizes}.`,
+    `Основа: ${l.base}. Слои и цвет: ${l.layers}. Лёд: ${l.ice}. Украшение: ${l.garnish}. Посуда: ${l.vessel}.`,
+    l.status === 'hypothesis' ? 'ВНИМАНИЕ: внешний вид не подтверждён владельцем — карточка остаётся черновиком до подтверждения, «уточнить» не додумывать как факт.' : 'Внешний вид — стандартный рецепт.',
+  ].join('\n');
 }
 
 function findHero(spec: ScreenSpec) {

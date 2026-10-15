@@ -130,7 +130,7 @@ test('роли: у каждой роли заполнены все 13 полей
     for (const f of REQUIRED_FIELDS) assert.ok(r[f] !== undefined, `${r.id}: нет поля ${f}`);
     for (const h of r.handoffRules) assert.ok(book.has(h.to), `${r.id}: передача несуществующей роли ${h.to}`);
   }
-  assert.equal(book.all().filter((r) => r.status === 'core').length, 7);
+  assert.equal(book.all().filter((r) => r.status === 'core').length, 13); // 7 ядро + 6 ролей фото- и видеопродакшена
   const casting = JSON.parse(await readFile(join(REPO, 'studio/org/casting.json'), 'utf8'));
   for (const t of Object.values(casting.types) as Array<{ author: string; critics: string[] }>) assert.ok(!t.critics.includes(t.author), 'автор не критикует свои варианты');
 });
