@@ -4,6 +4,7 @@
 
 import type { Store } from '../store/store.ts';
 import type { Clock } from '../core/util.ts';
+import { StopRequested } from '../core/errors.ts';
 
 interface StepRecord<T> {
   key: string;
@@ -19,6 +20,8 @@ export class StepJournal {
   private runId: string;
   /** Для тестов сбоев: бросить ошибку перед выполнением шага с этим ключом. */
   crashBefore: string | null = null;
+  /** Причина не начинать новый шаг (конец рабочих часов или сессии); null — работать. */
+  stopCheck: (() => string | null) | null = null;
 
   constructor(store: Store, clock: Clock, runId: string) {
     this.store = store;
@@ -41,6 +44,9 @@ export class StepJournal {
       this.crashBefore = null;
       throw new Error(`Имитация сбоя перед шагом ${key}`);
     }
+    // Выполненные шаги выше отдаются из журнала и после остановки; новый — не начинается.
+    const stop = this.stopCheck?.();
+    if (stop) throw new StopRequested(stop);
     const started = this.clock.now();
     const result = await fn();
     await this.store.put<StepRecord<T>>('steps', this.id(key), {

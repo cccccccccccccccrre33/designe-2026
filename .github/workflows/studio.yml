@@ -1,0 +1,71 @@
+# Студия DRIVE&KAVA в GitHub Actions (ADR-0007).
+#
+# Днём — сессия каждый час (до 50 минут): ответы в Telegram, работа над задачами,
+# сохранение состояния в зашифрованную ветку studio-state. Ночью сессия сразу
+# выходит: модели не вызываются, деньги не тратятся. Точные часы — в
+# studio/policies/schedule.json (по Киеву, переход на летнее время учтён в коде).
+#
+# Управление:
+#   выключить совсем     — Settings → Secrets and variables → Actions → Variables:
+#                          STUDIO_ENABLED = off  (или кнопка Disable workflow во вкладке Actions)
+#   запустить сейчас      — Actions → «Студия» → Run workflow (можно сразу дать задачу)
+#   пауза из Telegram     — /pause и /resume
+name: Студия
+
+on:
+  schedule:
+    # Каждый час в :07 с 05 до 20 UTC: летом это 08:07–23:07 по Киеву, зимой 07:07–22:07.
+    # Запуски вне рабочих часов на краях выходят за секунды, без вызовов моделей.
+    - cron: '7 5-20 * * *'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Новая задача для студии (необязательно)'
+        required: false
+        type: string
+      minutes:
+        description: 'Сколько минут работать (до 330)'
+        required: false
+        type: number
+        default: 50
+      force:
+        description: 'Работать даже в нерабочее время (только этот запуск)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write        # ветка состояния studio-state и ветки версий studio/*
+  pull-requests: write   # PR с версиями и merge после одобрения владельцем
+
+concurrency:
+  group: studio
+  cancel-in-progress: false
+
+jobs:
+  session:
+    if: vars.STUDIO_ENABLED != 'off'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Сессия студии
+        env:
+          STUDIO_STATE_KEY: ${{ secrets.STUDIO_STATE_KEY }}
+          AWS_BEARER_TOKEN_BEDROCK: ${{ secrets.AWS_BEARER_TOKEN_BEDROCK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+          BEDROCK_REGION: ${{ vars.BEDROCK_REGION }}
+          STUDIO_IMAGES: ${{ vars.STUDIO_IMAGES }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          # Ввод владельца передаётся только через окружение, не подставляется в команду.
+          STUDIO_TASK: ${{ inputs.task }}
+          STUDIO_MINUTES: ${{ inputs.minutes }}
+          STUDIO_FORCE: ${{ inputs.force }}
+        run: node src/cli/studio.ts actions-session

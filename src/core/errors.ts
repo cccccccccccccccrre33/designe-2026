@@ -41,6 +41,17 @@ export class ProviderError extends StudioError {
   }
 }
 
+/**
+ * Сессия заканчивается (рабочие часы, лимит времени задания): новый шаг не начинается,
+ * инициатива встаёт на паузу и продолжается в следующей сессии с того же шага.
+ */
+export class StopRequested extends StudioError {
+  constructor(message: string) {
+    super('stop_requested', message);
+    this.name = 'StopRequested';
+  }
+}
+
 /** Действие запрещено политикой (например, merge PR с изменениями кода). */
 export class PolicyViolation extends StudioError {
   constructor(message: string, details: Record<string, unknown> = {}) {
