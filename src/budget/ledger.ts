@@ -7,7 +7,7 @@ import type { Store } from '../store/store.ts';
 import { BudgetExceeded } from '../core/errors.ts';
 import { Mutex, dayKey, monthKey, newId, round, type Clock } from '../core/util.ts';
 
-export type SpendCategory = 'llm' | 'premium' | 'image';
+export type SpendCategory = 'llm' | 'premium' | 'image' | 'video';
 
 export interface BudgetPolicy {
   limits: {

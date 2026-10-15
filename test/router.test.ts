@@ -7,6 +7,7 @@ import { BudgetLedger } from '../src/budget/ledger.ts';
 import { ModelRouter } from '../src/llm/router.ts';
 import { BedrockRuntime, mapError } from '../src/llm/bedrock.ts';
 import { FileStore } from '../src/store/store.ts';
+import { VideoStudio } from '../src/pipeline/video.ts';
 import { BudgetExceeded, ModelChainExhausted, ProviderError } from '../src/core/errors.ts';
 import type { ChatRequest, LlmProvider, ModelRegistryConfig } from '../src/llm/types.ts';
 import type { Schema } from '../src/core/schema.ts';
@@ -14,9 +15,10 @@ import { REPO } from './helpers.ts';
 
 const schema: Schema = { type: 'object', required: ['ok'], properties: { ok: { type: 'boolean' } } };
 
-async function setup(behaviour: (req: ChatRequest) => string, limits?: Partial<{ initiativeUsd: number }>) {
+async function setup(behaviour: (req: ChatRequest) => string, limits?: Partial<{ initiativeUsd: number }>, mutate?: (c: ModelRegistryConfig) => void) {
   const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
   config.retry.retryDelayMs = 1;
+  mutate?.(config);
   const budget = JSON.parse(await readFile(join(REPO, 'studio/policies/budget.json'), 'utf8'));
   Object.assign(budget.limits, limits ?? {});
   const store = new FileStore(await mkdtemp(join(tmpdir(), 'dk-r-')));
@@ -38,19 +40,19 @@ const base = { initiativeId: 'i', role: 'studio-director', autonomous: false, sy
 test('маршрутизатор: начинает с самой дешёвой модели класса', async () => {
   const { router, seen } = await setup(() => '{"ok":true}');
   const r = await router.complete<{ ok: boolean }>({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'glm-4.7-flash');
-  assert.deepEqual(seen, ['glm-4.7-flash']);
+  assert.equal(r.model, 'gpt-5.6-luna');
+  assert.deepEqual(seen, ['gpt-5.6-luna']);
 });
 
 test('маршрутизатор: недоступная модель → следующий кандидат и circuit breaker', async () => {
   const { router, seen } = await setup((req) => {
-    if (req.model.key === 'glm-4.7-flash') throw new ProviderError('unavailable', 404, 'model not found');
+    if (req.model.key === 'gpt-5.6-luna') throw new ProviderError('unavailable', 404, 'model not found');
     return '{"ok":true}';
   });
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'nova-micro');
+  assert.equal(r.model, 'glm-4.7-flash');
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['glm-4.7-flash', 'nova-micro', 'nova-micro']); // вторая попытка уже без недоступной модели
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'glm-4.7-flash', 'glm-4.7-flash']); // вторая попытка уже без недоступной модели
 });
 
 test('маршрутизатор: временная ошибка — один повтор той же модели', async () => {
@@ -60,14 +62,14 @@ test('маршрутизатор: временная ошибка — один �
     return '{"ok":true}';
   });
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash']);
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna']);
 });
 
 test('маршрутизатор: невалидный JSON → одна попытка ремонта, затем другая модель', async () => {
-  const { router, seen } = await setup((req) => (req.model.key === 'glm-4.7-flash' ? '{"ok":"да"}' : '{"ok":true}'));
+  const { router, seen } = await setup((req) => (req.model.key === 'gpt-5.6-luna' ? '{"ok":"да"}' : '{"ok":true}'));
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'nova-micro');
-  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash', 'nova-micro']);
+  assert.equal(r.model, 'glm-4.7-flash');
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna', 'glm-4.7-flash']);
   assert.ok(r.attempts.some((a) => a.outcome === 'invalid_json'));
 });
 
@@ -91,10 +93,59 @@ test('маршрутизатор: критик из другого семейс�
 });
 
 test('маршрутизатор: модели без цены и без поддержки изображений пропускаются', async () => {
-  const { router } = await setup(() => '{"ok":true}');
+  const { router } = await setup(() => '{"ok":true}', undefined, (c) => {
+    c.models.find((m) => m.key === 'kimi-k3')!.price = null;
+    c.assignments.critique.unshift('deepseek-v3.2'); // текстовая модель без зрения в списке критики
+  });
   const c = router.candidates({ taskClass: 'critique', system: 's', user: 'u', images: [{ format: 'png', base64: 'x' }] });
-  assert.ok(c.skipped.some((s) => s.key === 'claude-haiku-5.5' && s.reason.includes('цена')));
+  assert.ok(c.skipped.some((s) => s.key === 'kimi-k3' && s.reason.includes('цена')));
+  assert.ok(c.skipped.some((s) => s.key === 'deepseek-v3.2' && s.reason.includes('изображения')));
   assert.ok(c.usable.every((m) => m.input.includes('image')));
+});
+
+test('реестр моделей: у каждой модели классов есть ID без заглушек, видеомодель не попадает в текстовые классы', async () => {
+  const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
+  for (const [cls, keys] of Object.entries(config.assignments)) {
+    for (const key of keys) {
+      const m = config.models.find((x) => x.key === key);
+      assert.ok(m, `${cls}: нет модели ${key}`);
+      assert.equal(m.kind, 'text', `${cls}: ${key} не текстовая`);
+      assert.ok(m.modelId && !m.modelId.includes('TODO'), `${key}: нет ID`);
+    }
+  }
+  assert.equal(config.models.find((m) => m.key === config.video?.analyze)?.kind, 'video');
+});
+
+test('Bedrock: поля модели (уровень рассуждения) уходят в additionalModelRequestFields', async () => {
+  let body: Record<string, unknown> = {};
+  const fake: typeof fetch = async (_url, init) => {
+    body = JSON.parse(String(init!.body));
+    return new Response(JSON.stringify({ output: { message: { content: [{ text: 'так' }] } }, usage: {} }), { status: 200 });
+  };
+  const b = new BedrockRuntime({ apiKey: 'k', fetchImpl: fake });
+  await b.chat({ model: { key: 'glm-5.3', modelId: 'us.zai.glm-5.3', kind: 'text', family: 'zai', input: ['text'], price: null, enabled: true, requestFields: { reasoning_effort: 'medium' } }, region: 'us-west-2', system: 's', user: 'u', maxTokens: 10 });
+  assert.deepEqual(body.additionalModelRequestFields, { reasoning_effort: 'medium' });
+});
+
+test('видео: Pegasus через InvokeModel, бюджет резервируется и списывается, большое видео не отправляется', async () => {
+  let call: { url: string; body: Record<string, unknown> } | null = null;
+  const fake: typeof fetch = async (url, init) => {
+    call = { url: String(url), body: JSON.parse(String(init!.body)) };
+    return new Response(JSON.stringify({ message: 'Гость забирает стакан из окна.', stopReason: 'stop' }), { status: 200 });
+  };
+  const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
+  const budget = JSON.parse(await readFile(join(REPO, 'studio/policies/budget.json'), 'utf8'));
+  const ledger = new BudgetLedger(new FileStore(await mkdtemp(join(tmpdir(), 'dk-v-'))), budget, { now: () => Date.now() });
+  const studio = new VideoStudio({ provider: new BedrockRuntime({ apiKey: 'k', fetchImpl: fake }), config, ledger });
+  const res = await studio.analyze({ initiativeId: 'v1', prompt: 'Что происходит у окна?', video: Buffer.from('видео'), seconds: 60 });
+  assert.equal(res.text, 'Гость забирает стакан из окна.');
+  assert.equal(call!.url, 'https://bedrock-runtime.us-west-2.amazonaws.com/model/us.twelvelabs.pegasus-1-5-v1%3A0/invoke');
+  assert.equal((call!.body.mediaSource as { base64String: string }).base64String, Buffer.from('видео').toString('base64'));
+  assert.equal(call!.body.inputPrompt, 'Что происходит у окна?');
+  assert.ok(res.costUsd > 0 && res.costUsd === studio.estimate(60, 2048));
+  assert.equal((await ledger.summary('v1')).initiative!.spentUsd, res.costUsd);
+  await assert.rejects(studio.analyze({ initiativeId: 'v1', prompt: 'x', video: Buffer.alloc(26 * 1024 * 1024), seconds: 10 }), /25 МБ/);
+  await assert.rejects(studio.analyze({ initiativeId: 'v1', prompt: 'x', video: Buffer.from('v'), seconds: 0 }), /длительность/);
 });
 
 test('маршрутизатор: бюджет исчерпан — отказ до вызова модели', async () => {
@@ -107,7 +158,7 @@ test('маршрутизатор: premium-арбитр только с прич�
   const { router } = await setup(() => '{"ok":true}');
   await assert.rejects(router.complete({ ...base, taskClass: 'arbiter' }), /причину/);
   const r = await router.complete({ ...base, taskClass: 'arbiter', reason: 'спор лидеров' });
-  assert.equal(r.model, 'claude-sonnet-4.6');
+  assert.equal(r.model, 'grok-4.7');
 });
 
 test('Bedrock: формат запроса Converse и разбор ответа', async () => {
@@ -124,7 +175,9 @@ test('Bedrock: формат запроса Converse и разбор ответа
   assert.equal((captured!.init.headers as Record<string, string>).authorization, 'Bearer test-key');
   const body = JSON.parse(String(captured!.init.body));
   assert.equal(body.system[0].text, 'sys');
-  assert.equal(body.messages[0].content[2].image.source.bytes, 'AAA');
+  // Картинки идут перед текстом задания.
+  assert.equal(body.messages[0].content[1].image.source.bytes, 'AAA');
+  assert.equal(body.messages[0].content[2].text, 'hi');
   assert.equal(body.inferenceConfig.maxTokens, 50);
 });
 

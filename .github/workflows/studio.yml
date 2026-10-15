@@ -9,6 +9,7 @@
 #   выключить совсем     — Settings → Secrets and variables → Actions → Variables:
 #                          STUDIO_ENABLED = off  (или кнопка Disable workflow во вкладке Actions)
 #   запустить сейчас      — Actions → «Студия» → Run workflow (можно сразу дать задачу)
+#   проверить модели      — Run workflow → «Что сделать» = check-models
 #   пауза из Telegram     — /pause и /resume
 name: Студия
 
@@ -19,6 +20,14 @@ on:
     - cron: '7 5-20 * * *'
   workflow_dispatch:
     inputs:
+      action:
+        description: 'Что сделать'
+        required: false
+        type: choice
+        default: session
+        options:
+          - session
+          - check-models
       task:
         description: 'Новая задача для студии (необязательно)'
         required: false
@@ -68,4 +77,11 @@ jobs:
           STUDIO_TASK: ${{ inputs.task }}
           STUDIO_MINUTES: ${{ inputs.minutes }}
           STUDIO_FORCE: ${{ inputs.force }}
-        run: node src/cli/studio.ts actions-session
+          STUDIO_ACTION: ${{ inputs.action }}
+        # check-models — короткий вызов каждой текстовой модели и таблица в сводке (в любое время).
+        run: |
+          if [ "$STUDIO_ACTION" = "check-models" ]; then
+            node src/cli/studio.ts check-bedrock
+          else
+            node src/cli/studio.ts actions-session
+          fi

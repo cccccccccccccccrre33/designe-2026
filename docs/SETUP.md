@@ -54,6 +54,7 @@ Actions to create and approve pull requests**. Без этого студия н
 | Поменять рабочие часы | `studio/policies/schedule.json`: `workHours`, `days`, `timezone` |
 | Поменять лимиты денег | `studio/policies/budget.json` (день, месяц, на задачу) |
 | Посмотреть, что сделано | Actions → «Студия» → запуск → сводка; `/status` и `/budget` в Telegram |
+| Проверить модели | Run workflow → «Что сделать» = `check-models` |
 
 Необязательные переменные (Variables): `BEDROCK_REGION` (по умолчанию us-west-2),
 `STUDIO_IMAGES=on` — генерировать фото напитков через Stability (тратит бюджет).
@@ -76,11 +77,15 @@ Actions to create and approve pull requests**. Без этого студия н
 ## 5. Bedrock
 
 - Регион: `us-west-2` (Stable Image Core/Ultra есть только там).
-- Включить доступ к моделям в консоли Bedrock → Model access: GLM 4.7 Flash,
-  MiniMax M2.5, Kimi K2.5, DeepSeek V3.2, Nova 2 Lite, Claude Haiku 4.5,
-  Claude Sonnet 4.6, Stable Image Core и Ultra, Stable Image Inpaint,
-  Remove Background, Conservative Upscale. Затем `npm run check:bedrock` (локально,
-  ключ в `.env`) покажет, какие модели реально отвечают.
+- Один API-ключ работает для всех моделей аккаунта. Отдельно включать модели обычно
+  не нужно: если в карточке модели есть только «Open in playground», она уже
+  доступна. Кнопку «Request access» / «Subscribe» нажать, если она есть.
+- Модели студии: GPT-5.6 Luna, MiniMax M2.5, DeepSeek V3.2, GLM 4.7, GLM 5.3,
+  Qwen3 VL 235B A22B, Grok 4.6 и 4.7, Kimi K3, Nova 2 Lite, Nova Pro,
+  Llama 4 Maverick, видео — TwelveLabs Pegasus 1.5; запасные — Claude Haiku 4.5 и
+  Sonnet 4.6 (список и порядок — docs/MODELS-AND-COST.md).
+- Проверка, что модели отвечают: Actions → «Студия» → Run workflow → «Что сделать» =
+  `check-models` (таблица в сводке запуска).
 - Сверить цены в `studio/policies/models.json` со страницей цен Bedrock; модели
   без цены система не вызывает.
 

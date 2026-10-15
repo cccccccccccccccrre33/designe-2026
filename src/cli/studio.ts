@@ -9,6 +9,7 @@
 //   check-bedrock                минимальный живой вызов каждой включённой модели
 //   eval [--class c] [--models a,b] [--scripted]  сравнительное тестирование моделей
 //   knowledge-ingest <file.md>   разобрать архив ссылок в knowledge/sources/inbox-*.md
+//   analyze-video <файл> "<вопрос>" --seconds N   разбор видео видеомоделью (Pegasus)
 //   actions-session [--minutes N] [--force] [--no-state] [--scripted]
 //                                сессия в GitHub Actions: рабочие часы, Telegram, состояние (ADR-0007)
 
@@ -32,6 +33,7 @@ import { systemClock } from '../core/util.ts';
 import { describeHours, loadSchedule, workWindow } from '../runtime/schedule.ts';
 import { StateSync, stateKey, type RestoreReport } from '../runtime/state.ts';
 import { formatSessionSummary, runSession } from '../runtime/session.ts';
+import { VideoStudio } from '../pipeline/video.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 loadDotEnv(join(ROOT, '.env'));
@@ -169,6 +171,8 @@ async function main(): Promise<void> {
     }
     case 'actions-session':
       return actionsSession();
+    case 'analyze-video':
+      return analyzeVideo();
     default:
       console.log(readHelp());
   }
@@ -284,18 +288,50 @@ async function demo(): Promise<void> {
 async function checkBedrock(): Promise<void> {
   const config = await loadConfig(ROOT);
   const key = env('AWS_BEARER_TOKEN_BEDROCK');
-  if (!key) throw new Error('Нужен AWS_BEARER_TOKEN_BEDROCK в .env');
-  const bedrock = new BedrockRuntime({ apiKey: key, timeoutMs: 60_000 });
+  if (!key) {
+    await summary('## Проверка моделей\n\n⏳ Нет секрета AWS_BEARER_TOKEN_BEDROCK — проверять нечем.\n');
+    return;
+  }
+  const bedrock = new BedrockRuntime({ apiKey: key, timeoutMs: 90_000 });
   const region = env('BEDROCK_REGION', config.models.region);
-  console.log(`Регион: ${region}`);
-  for (const m of config.models.models.filter((x) => x.enabled && x.kind === 'text')) {
+  const rows: string[] = [];
+  let ok = 0;
+  const textModels = config.models.models.filter((x) => x.enabled && x.kind === 'text');
+  for (const m of textModels) {
     const started = Date.now();
     try {
-      const res = await bedrock.chat({ model: m, region: m.region ?? region, system: 'Ответь одним словом.', user: 'Скажи «так».', maxTokens: 20 });
-      console.log(`OK    ${m.key.padEnd(20)} ${m.modelId}  ${Date.now() - started} мс  «${res.text.trim().slice(0, 20)}»`);
+      // 512 токенов: модели с рассуждением тратят часть ответа на «размышление».
+      const res = await bedrock.chat({ model: m, region: m.region ?? region, system: 'Ответь одним словом.', user: 'Скажи «так».', maxTokens: 512 });
+      ok++;
+      rows.push(`| ✅ | ${m.key} | \`${m.modelId}\` | ${Date.now() - started} мс | «${res.text.trim().slice(0, 20).replace(/\|/g, '/')}» |`);
     } catch (err) {
-      console.log(`FAIL  ${m.key.padEnd(20)} ${m.modelId}  ${(err as Error).message.slice(0, 160)}`);
+      rows.push(`| ❌ | ${m.key} | \`${m.modelId}\` | — | ${(err as Error).message.slice(0, 160).replace(/\|/g, '/').replace(/\n/g, ' ')} |`);
     }
+  }
+  const skipped = config.models.models.filter((x) => x.enabled && x.kind !== 'text').map((x) => x.key);
+  await summary([
+    `## Проверка моделей Bedrock (${region})`, '',
+    `Отвечают ${ok} из ${textModels.length} текстовых моделей. Каждый вызов — несколько токенов, доли цента.`, '',
+    '| | Модель | ID | Время | Ответ или ошибка |', '|---|---|---|---|---|', ...rows, '',
+    `Не проверялись (платный вызов с картинкой или видео): ${skipped.join(', ')}.`,
+    'Модель с ❌ студия просто пропускает и берёт следующую из списка.', '',
+  ].join('\n'));
+}
+
+/** Разбор видео видеомоделью (Pegasus): analyze-video <файл.mp4> "<вопрос>" --seconds N */
+async function analyzeVideo(): Promise<void> {
+  const [file, ...rest] = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--seconds');
+  const prompt = rest.join(' ');
+  if (!file || !prompt) throw new Error('Использование: analyze-video <файл.mp4> "<что узнать о видео>" --seconds <длительность>');
+  const app = await createApp({ repoRoot: ROOT, quiet: true, telegram: null, github: null });
+  try {
+    const key = env('AWS_BEARER_TOKEN_BEDROCK');
+    if (!key) throw new Error('Нужен AWS_BEARER_TOKEN_BEDROCK');
+    const studio = new VideoStudio({ provider: new BedrockRuntime({ apiKey: key, timeoutMs: 600_000 }), config: app.config.models, ledger: app.ledger });
+    const res = await studio.analyze({ initiativeId: 'video-cli', prompt, video: await readFile(file), seconds: Number(opt('seconds')) });
+    console.log(`${res.text}\n\n(${res.model}, ≈$${res.costUsd})`);
+  } finally {
+    await app.close();
   }
 }
 
