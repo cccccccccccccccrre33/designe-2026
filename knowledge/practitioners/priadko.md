@@ -1,0 +1,37 @@
+# Татьяна Прядко
+
+Drinkit (контент-продакшн) · Head Set Designer, креативное направление сцены · школа «Drinkit — предметный контент»
+
+> Сгенерировано из studio/org/practitioners.json. Профессиональный почерк по публичным работам; не биография и не имитация личности.
+
+## Татьяна Прядко — приёмы
+<!-- meta: id=PR-priadko-signatures; tier=A; tags=practitioner,drinkit-content,priadko; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/210009497/Set-design-for-Drinkit -->
+- **Цветовой мир вкуса** [SET-COLOR-WORLD]: У дропа — один фирменный цвет вкуса, пронизывающий всю сцену (цитрус и османтус — весь сет оранжевый; лето — карамельные изгибы бумаги). В DRIVE&KAVA: У каждого напитка DRIVE&KAVA свой цветовой мир; серия держится светом и формой, а не одинаковым фоном.
+- **Реквизит-подсказка вкуса** [SET-FLAVOR-METAPHOR]: Реквизит намекает на вкус, а не повторяет ингредиенты: подставка-кекс для латте «как цитрусовый кекс», оранжевые блоки = апельсин и лёд одновременно. В DRIVE&KAVA: Для «Айс Джмелик» — медовые соты как подставка, а не банка мёда рядом.
+- **Пропорции сервиса в реквизите** [SET-BRAND-GEOMETRY]: Скруглённые прямоугольные подставки повторяют пропорции цифровых стоек выдачи — связь с брендом без логотипа. В DRIVE&KAVA: Подставки DRIVE&KAVA в пропорциях окна выдачи для авто.
+- **Неон — только фоном** [SET-NEON-BACK]: Неон как главный акцент перегружал кадр; его увели в фон ради глубины, на переднем плане — мягкие отражения и блики. В DRIVE&KAVA: Ночные сцены у окна: неоновая вывеска размыта позади, напиток в мягком свете.
+- **Температура через материал** [SET-TEMPERATURE]: Горячее — тёплый свет, пряные оттенки, уют; холодное — прозрачный замороженный декор, кристаллы льда. Контраст температур — часть истории. В DRIVE&KAVA: Пары «гарячий/айс» одного напитка снимаются как противопоставление.
+- **Многослойные сцены и мобили** [SET-LAYERED-SCENES]: Многоплановые декорации (горы, озеро, круг солнца), самодельные мобили, медленно движущееся небо в видео; руки модели — как будто гость уже пробует. В DRIVE&KAVA: Видеопетли карточек: одно медленное движение в фоне, напиток статичен.
+- **Праздник через символы** [SET-SUBTLE-OCCASION]: Сезон и праздник — через созданный мир и нюансы (пряничный городок, каток, бенгальские огни), а не через стандартные атрибуты. В DRIVE&KAVA: Новогодний дроп DRIVE&KAVA — «зимова траса» в миниатюре вместо ёлки и шаров.
+- **Настроение без пугающего** [SET-NO-SCARY]: Хеллоуин без ведьм, пауков и жути: глубокие тени, мягкое свечение, немного магии; иллюзия исчезновения и появления, напиток «сам» закручивается, ложка «сама» пробует мусс; для айс-версии — ледяные блоки с гранатом внутри как отсылка к вкусу. В DRIVE&KAVA: Сезонные поводы DRIVE&KAVA — через свет и одну магическую деталь; айс-версии — лёд с ингредиентом внутри, без пугающих и дешёвых атрибутов.
+- **Одна съёмка — все носители** [SET-MULTI-CHANNEL]: Осеннее меню снято и адаптировано сразу для соцсетей, мобильного приложения и ТВ-табло. В DRIVE&KAVA: Кадр строится с запасом под 4:5 и 9:16 в приложении и под табло меню под окном выдачи.
+
+## Татьяна Прядко — метод и планка
+<!-- meta: id=PR-priadko-method; tier=A; tags=practitioner,drinkit-content,priadko; kind=practitioner; rights=public-reference-only; url=https://www.behance.net/gallery/210009497/Set-design-for-Drinkit -->
+Метод: Анализ айдентики бренда → ключевые направления сцены. Симметрия, плавные линии, цветовая гармония в серии. Работает со своим экипажем: ассистент сет-дизайнера (Саша Кулагина), фуд-стайлинг, фото, ретушь, продюсер.
+Планка: Напиток — в центре, сцена подчинена ему.
+Избегать: Фрукты рядом со стаканом как единственная идея. Неон на переднем плане.
+
+## Источники
+- Set-design for Drinkit (тир A): https://www.behance.net/gallery/210009497/Set-design-for-Drinkit
+- Drinkit: visual identity through set design (тир A): https://www.behance.net/gallery/212137997/Drinkit-visual-identity-through-set-design
+- Spring Drop (тир A): https://www.behance.net/gallery/212123605/photo-video-drinkit-spring-drop
+- Summer Menu: Photo & Video (тир A): https://www.behance.net/gallery/229702827/Summer-Menu-Photo-Video-for-Drinkit
+- Gingerbread Holiday Campaign (тир A): https://www.behance.net/gallery/212889389/Gingerbread-Drink-Set-Design-Holiday-Ad-Campaign
+- drinks for DRINKIT (тир A): https://www.behance.net/gallery/196170111/drinks-for-DRINKIT
+- Spring Drink Collection (тир A): https://www.behance.net/gallery/223709781/Spring-Drink-Collection-Set-Design-Visual-Story
+- Autumn Menu: Photo & Video (тир A): https://www.behance.net/gallery/212138193/Autumn-Menu-Photo-Video-for-Drinkit
+- The Magical Halloween Mood (тир A): https://www.behance.net/gallery/212157347/Drink-Set-Design-The-Magical-Halloween-Mood
+- Сайт (тир A): https://priadko.com
+
+Роли студии, работающие в этой школе: beverage-art-director, set-designer, color-lighting-artist, video-motion-art-director, advisor-graphics-optics

@@ -1,0 +1,19 @@
+{
+  "_comment": "Рубрика слепой критики. Оценки 1–5. Порог прохода — средневзвешенный балл. Вес отражает приоритет ежедневного использования над эффектностью. school — уровень школ Drinkit/amo/Dodo (studio/org/practitioners.json) без копирования.",
+  "criteria": [
+    { "id": "task-clarity", "title": "Решена заявленная проблема", "weight": 0.15 },
+    { "id": "hierarchy", "title": "Иерархия: главное видно первым", "weight": 0.11 },
+    { "id": "speed", "title": "Скорость пути к заказу", "weight": 0.13 },
+    { "id": "character", "title": "Характер DRIVE&KAVA, не копия Drinkit", "weight": 0.09 },
+    { "id": "school", "title": "Уровень школ Drinkit/amo/Dodo: приёмы применены по делу, без копирования", "weight": 0.06 },
+    { "id": "visual-quality", "title": "Качество визуала: фото, свет, типографика", "weight": 0.11 },
+    { "id": "motion", "title": "Движение и непрерывность", "weight": 0.06 },
+    { "id": "accessibility", "title": "Доступность и читаемость", "weight": 0.1 },
+    { "id": "one-hand", "title": "Удобство одной рукой", "weight": 0.08 },
+    { "id": "consistency", "title": "Согласованность с системой", "weight": 0.05 },
+    { "id": "feasibility", "title": "Реализуемость", "weight": 0.06 }
+  ],
+  "passScore": 3.8,
+  "arbiterMargin": 0.15,
+  "arbiterDisagreement": 1.2
+}

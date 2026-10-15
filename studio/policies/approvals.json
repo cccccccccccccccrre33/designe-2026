@@ -1,0 +1,12 @@
+{
+  "_comment": "Этапы и разрешения. Одобрение одного этапа не разрешает следующий. Молчание владельца никогда не считается согласием.",
+  "stages": [
+    { "id": "design-direction", "title": "Дизайн-направление утверждено", "grantedBy": "owner-telegram-approve", "allows": ["record-decision", "merge-studio-paths"] },
+    { "id": "handoff-to-engineering", "title": "Передача разработке", "grantedBy": "owner-explicit-command", "allows": ["create-engineering-issue"], "status": "not-implemented" },
+    { "id": "production-release", "title": "Выпуск в рабочем приложении", "grantedBy": "owner-explicit-command", "allows": [], "status": "not-available" }
+  ],
+  "autoMergePaths": ["studio/", "design-system/"],
+  "neverAutoMergePaths": ["src/", "infra/", ".github/", "package.json", "package-lock.json"],
+  "silenceIsConsent": false,
+  "reminders": { "afterHours": 48, "max": 1 }
+}

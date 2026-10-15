@@ -1,0 +1,50 @@
+{
+  "_comment": "Кто нужен под тип инициативы. Таблица, а не LLM: кастинг детерминирован и дёшев. LLM только классифицирует тип и теги на этапе триажа. Автор вариантов никогда не входит в критики своих вариантов.",
+  "types": {
+    "screen-redesign": {
+      "positions": ["creative-director", "senior-product-designer", "beverage-art-director", "ux-quality-reviewer", "motion-designer"],
+      "author": "senior-product-designer",
+      "photo": "beverage-art-director",
+      "photoLenses": ["set-designer", "food-stylist", "color-lighting-artist", "product-photographer"],
+      "motion": "motion-designer",
+      "critics": ["ux-quality-reviewer", "creative-director", "beverage-art-director"],
+      "director": "studio-director"
+    },
+    "new-screen": {
+      "positions": ["creative-director", "senior-product-designer", "ux-quality-reviewer"],
+      "author": "senior-product-designer",
+      "photo": "beverage-art-director",
+      "photoLenses": ["set-designer", "food-stylist", "color-lighting-artist"],
+      "motion": "motion-designer",
+      "critics": ["ux-quality-reviewer", "creative-director"],
+      "director": "studio-director"
+    },
+    "drink-visuals": {
+      "positions": ["creative-director", "beverage-art-director", "senior-product-designer"],
+      "author": "senior-product-designer",
+      "photo": "beverage-art-director",
+      "photoLenses": ["set-designer", "food-stylist", "color-lighting-artist", "product-photographer", "retouching-specialist"],
+      "motion": null,
+      "critics": ["creative-director", "ux-quality-reviewer"],
+      "director": "studio-director"
+    },
+    "motion-transition": {
+      "positions": ["motion-designer", "senior-product-designer", "ux-quality-reviewer"],
+      "author": "senior-product-designer",
+      "photo": null,
+      "photoLenses": [],
+      "motion": "motion-designer",
+      "critics": ["ux-quality-reviewer", "creative-director"],
+      "director": "studio-director"
+    }
+  },
+  "tagTriggers": {
+    "motion": { "addPositions": ["motion-designer"] },
+    "physics": { "consult": ["advisor-interaction-physics"] },
+    "waiting": { "consult": ["advisor-queueing", "advisor-cognition-hci"] },
+    "glass": { "consult": ["advisor-perception"] },
+    "pickup": { "addPositions": ["advisor-space-ergonomics"], "consult": ["advisor-space-ergonomics"] },
+    "payment": { "addPositions": ["ux-quality-reviewer"] }
+  },
+  "limits": { "maxPositions": 5, "maxCritics": 3, "maxConsults": 2 }
+}

@@ -1,0 +1,126 @@
+{
+  "_comment": "Реестр моделей Bedrock. ID и регионы сверены с карточками моделей AWS 15.10.2026, где отмечено verified. Модель без цены маршрутизатор не вызывает. Порядок в assignments — от дешёвой к дорогой; после eval порядок меняется здесь, роли не меняются.",
+  "region": "us-west-2",
+  "models": [
+    {
+      "key": "glm-4.7-flash", "modelId": "zai.glm-4.7-flash", "kind": "text", "family": "zai", "tier": "economy",
+      "input": ["text"], "contextTokens": 203000, "maxOutputTokens": 128000,
+      "price": { "inputPer1M": 0.07, "outputPer1M": 0.4, "confidence": "medium" },
+      "enabled": true, "lifecycle": "legacy", "eol": "2027-03-30",
+      "notes": "ID verified. Статус Legacy, EOL 30.03.2027 — заменить до этой даты."
+    },
+    {
+      "key": "gpt-oss-20b", "modelId": "openai.gpt-oss-20b-1:0", "kind": "text", "family": "openai-oss", "tier": "economy",
+      "input": ["text"], "contextTokens": 128000, "maxOutputTokens": 32000,
+      "price": { "inputPer1M": 0.07, "outputPer1M": 0.3, "confidence": "low" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID по запуску 2025 г., проверить командой check:bedrock."
+    },
+    {
+      "key": "nova-micro", "modelId": "us.amazon.nova-micro-v1:0", "kind": "text", "family": "amazon", "tier": "economy",
+      "input": ["text"], "contextTokens": 128000, "maxOutputTokens": 10000,
+      "price": { "inputPer1M": 0.035, "outputPer1M": 0.14, "confidence": "medium" },
+      "enabled": true, "lifecycle": "active"
+    },
+    {
+      "key": "nemotron-nano-3-30b", "modelId": "TODO", "kind": "text", "family": "nvidia", "tier": "economy",
+      "input": ["text"], "price": null, "enabled": false,
+      "notes": "Есть в каталоге (Nemotron Nano 3 30B). ID и цену подтвердить, затем включить."
+    },
+    {
+      "key": "ministral-3-8b", "modelId": "TODO", "kind": "text", "family": "mistral", "tier": "economy",
+      "input": ["text"], "price": null, "enabled": false,
+      "notes": "Есть в каталоге (Ministral 3 8B). ID и цену подтвердить, затем включить."
+    },
+    {
+      "key": "minimax-m2.5", "modelId": "minimax.minimax-m2.5", "kind": "text", "family": "minimax", "tier": "main",
+      "input": ["text"], "contextTokens": 196000, "maxOutputTokens": 8000,
+      "price": { "inputPer1M": 0.3, "outputPer1M": 1.2, "confidence": "high" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID verified. Максимум 8K токенов на выходе — Screen Spec должен укладываться."
+    },
+    {
+      "key": "glm-4.7", "modelId": "zai.glm-4.7", "kind": "text", "family": "zai", "tier": "main",
+      "input": ["text"], "contextTokens": 200000, "maxOutputTokens": 32000,
+      "price": { "inputPer1M": 0.6, "outputPer1M": 2.2, "confidence": "medium" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID по аналогии с glm-4.7-flash — проверить check:bedrock."
+    },
+    {
+      "key": "deepseek-v3.2", "modelId": "TODO", "kind": "text", "family": "deepseek", "tier": "main",
+      "input": ["text"], "price": { "inputPer1M": 0.62, "outputPer1M": 1.85, "confidence": "low" }, "enabled": false,
+      "notes": "Есть в каталоге. ID подтвердить, затем включить."
+    },
+    {
+      "key": "kimi-k2.5", "modelId": "moonshotai.kimi-k2.5", "kind": "text", "family": "moonshot", "tier": "vision",
+      "input": ["text", "image"], "contextTokens": 256000, "maxOutputTokens": 16000,
+      "price": { "inputPer1M": 0.6, "outputPer1M": 3.0, "confidence": "high" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID verified. Изображения до 3 МБ."
+    },
+    {
+      "key": "nova-2-lite", "modelId": "us.amazon.nova-2-lite-v1:0", "kind": "text", "family": "amazon", "tier": "vision",
+      "input": ["text", "image", "video"], "contextTokens": 1000000, "maxOutputTokens": 64000,
+      "price": { "inputPer1M": 0.3, "outputPer1M": 2.5, "confidence": "medium" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID verified (us.-профиль). Единственный из списка с видео на входе."
+    },
+    {
+      "key": "claude-haiku-5.5", "modelId": "us.anthropic.claude-haiku-5-5", "kind": "text", "family": "anthropic", "tier": "main",
+      "input": ["text", "image"], "contextTokens": 1000000, "maxOutputTokens": 128000,
+      "price": null, "enabled": true, "lifecycle": "active",
+      "notes": "ID verified (us.-профиль). Цена на 15.10.2026 не найдена — впишите со страницы цен, иначе маршрутизатор её пропускает."
+    },
+    {
+      "key": "claude-haiku-4.5", "modelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0", "kind": "text", "family": "anthropic", "tier": "main",
+      "input": ["text", "image"], "contextTokens": 200000, "maxOutputTokens": 64000,
+      "price": { "inputPer1M": 1.0, "outputPer1M": 5.0, "confidence": "high" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID проверить check:bedrock."
+    },
+    {
+      "key": "claude-sonnet-4.6", "modelId": "us.anthropic.claude-sonnet-4-6", "kind": "text", "family": "anthropic", "tier": "premium",
+      "input": ["text", "image"], "contextTokens": 1000000, "maxOutputTokens": 64000,
+      "price": { "inputPer1M": 3.0, "outputPer1M": 15.0, "confidence": "high" },
+      "enabled": true, "lifecycle": "active",
+      "notes": "ID из примера документации API-ключей."
+    },
+    {
+      "key": "stable-image-core", "modelId": "stability.stable-image-core-v1:1", "kind": "image", "family": "stability",
+      "input": ["text"], "price": { "perImage": 0.04, "confidence": "low" }, "enabled": true, "region": "us-west-2",
+      "notes": "ID verified. Только us-west-2."
+    },
+    {
+      "key": "stable-image-ultra", "modelId": "stability.stable-image-ultra-v1:1", "kind": "image", "family": "stability",
+      "input": ["text"], "price": { "perImage": 0.14, "confidence": "low" }, "enabled": true, "region": "us-west-2",
+      "notes": "ID verified. Только us-west-2."
+    },
+    {
+      "key": "stable-image-inpaint", "modelId": "us.stability.stable-image-inpaint-v1:0", "kind": "image", "family": "stability",
+      "input": ["text", "image"], "price": { "perImage": 0.07, "confidence": "low" }, "enabled": true, "region": "us-west-2",
+      "notes": "ID verified (us.-профиль)."
+    }
+  ],
+  "assignments": {
+    "classify": ["glm-4.7-flash", "nova-micro", "gpt-oss-20b"],
+    "extract": ["glm-4.7-flash", "gpt-oss-20b", "nova-micro"],
+    "dedupe": ["glm-4.7-flash", "nova-micro"],
+    "position": ["minimax-m2.5", "glm-4.7", "claude-haiku-5.5", "claude-haiku-4.5"],
+    "brief": ["minimax-m2.5", "glm-4.7", "claude-haiku-5.5", "claude-haiku-4.5"],
+    "spec": ["minimax-m2.5", "glm-4.7", "claude-haiku-5.5", "claude-haiku-4.5"],
+    "critique": ["kimi-k2.5", "nova-2-lite", "claude-haiku-5.5", "claude-haiku-4.5"],
+    "science": ["minimax-m2.5", "glm-4.7", "claude-haiku-5.5"],
+    "arbiter": ["claude-sonnet-4.6"]
+  },
+  "evalThresholds": {
+    "classify": 0.85,
+    "extract": 0.85,
+    "position": 0.7,
+    "brief": 0.7,
+    "spec": 0.75,
+    "critique": 0.7
+  },
+  "breaker": { "failures": 3, "cooldownMs": 600000 },
+  "retry": { "maxAttemptsPerCall": 4, "retryDelayMs": 2000 },
+  "images": { "search": "stable-image-core", "final": "stable-image-ultra", "inpaint": "stable-image-inpaint" }
+}

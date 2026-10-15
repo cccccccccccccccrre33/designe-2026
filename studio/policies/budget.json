@@ -1,0 +1,20 @@
+{
+  "_comment": "Лимиты в USD. Размер AWS-кредита неизвестен — значения консервативные, меняются здесь. Пороги уведомлений — по дню и месяцу.",
+  "limits": {
+    "initiativeUsd": 5,
+    "dailyUsd": 10,
+    "monthlyUsd": 100,
+    "imagePerInitiativeUsd": 2,
+    "premiumMonthlyUsd": 10,
+    "autonomousMonthlyShare": 0.2
+  },
+  "thresholds": [0.5, 0.8, 0.95],
+  "process": {
+    "maxLlmCallsPerInitiative": 60,
+    "maxVariants": 3,
+    "maxCritiqueRounds": 2,
+    "maxRefineIterations": 2,
+    "maxPositions": 5,
+    "parallelism": 3
+  }
+}
