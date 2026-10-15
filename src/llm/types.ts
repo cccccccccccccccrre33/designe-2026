@@ -14,13 +14,15 @@ export type TaskClass =
 export interface ModelEntry {
   key: string;
   modelId: string;
-  kind: 'text' | 'image';
+  kind: 'text' | 'image' | 'video';
   family: string;
   tier?: Tier;
   input: Array<'text' | 'image' | 'video'>;
   contextTokens?: number;
   maxOutputTokens?: number;
-  price: { inputPer1M?: number; outputPer1M?: number; perImage?: number; confidence: 'high' | 'medium' | 'low' } | null;
+  price: { inputPer1M?: number; outputPer1M?: number; perImage?: number; perSecond?: number; confidence: 'high' | 'medium' | 'low' } | null;
+  /** Поля модели для Converse additionalModelRequestFields (например, reasoning_effort). */
+  requestFields?: Record<string, unknown>;
   enabled: boolean;
   region?: string;
   lifecycle?: 'active' | 'legacy';
@@ -36,6 +38,27 @@ export interface ModelRegistryConfig {
   breaker: { failures: number; cooldownMs: number };
   retry: { maxAttemptsPerCall: number; retryDelayMs: number };
   images: { search: string; final: string; inpaint?: string };
+  video?: { analyze: string };
+}
+
+export interface VideoRequest {
+  model: ModelEntry;
+  region: string;
+  prompt: string;
+  /** Видео до 25 МБ — base64 в запросе; большее — ссылкой на S3. */
+  base64?: string;
+  s3?: { uri: string; bucketOwner: string };
+  maxOutputTokens?: number;
+  temperature?: number;
+}
+
+export interface VideoResponse {
+  text: string;
+  stopReason: string;
+}
+
+export interface VideoProvider {
+  analyzeVideo(req: VideoRequest): Promise<VideoResponse>;
 }
 
 export interface ImagePart {

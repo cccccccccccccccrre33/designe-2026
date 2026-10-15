@@ -6,7 +6,7 @@
 // нет ключа. Команда `npm run check:bedrock` делает минимальный живой запрос.
 
 import { ProviderError } from '../core/errors.ts';
-import type { ChatRequest, ChatResponse, ImageProvider, ImageRequest, ImageResponse, LlmProvider } from './types.ts';
+import type { ChatRequest, ChatResponse, ImageProvider, ImageRequest, ImageResponse, LlmProvider, VideoProvider, VideoRequest, VideoResponse } from './types.ts';
 
 type FetchLike = typeof fetch;
 
@@ -17,7 +17,7 @@ export interface BedrockOptions {
   timeoutMs?: number;
 }
 
-export class BedrockRuntime implements LlmProvider, ImageProvider {
+export class BedrockRuntime implements LlmProvider, ImageProvider, VideoProvider {
   private apiKey: string;
   private fetchImpl: FetchLike;
   private endpoint: (region: string) => string;
@@ -58,11 +58,13 @@ export class BedrockRuntime implements LlmProvider, ImageProvider {
   }
 
   async chat(req: ChatRequest): Promise<ChatResponse> {
-    const content: unknown[] = [{ text: req.user }];
+    // Изображения перед текстом задания: так рекомендуют Kimi K3 и Claude.
+    const content: unknown[] = [];
     for (const img of req.images ?? []) {
       if (img.label) content.push({ text: `Изображение: ${img.label}` });
       content.push({ image: { format: img.format, source: { bytes: img.base64 } } });
     }
+    content.push({ text: req.user });
     const messages: unknown[] = [{ role: 'user', content }];
     if (req.repair) {
       messages.push({ role: 'assistant', content: [{ text: req.repair.previous.slice(0, 20_000) }] });
@@ -71,11 +73,12 @@ export class BedrockRuntime implements LlmProvider, ImageProvider {
         content: [{ text: `Ответ не прошёл проверку схемы:\n- ${req.repair.errors.slice(0, 20).join('\n- ')}\nВерни ТОЛЬКО исправленный JSON целиком, без пояснений.` }],
       });
     }
-    const body = {
+    const body: Record<string, unknown> = {
       system: [{ text: req.system }],
       messages,
       inferenceConfig: { maxTokens: req.maxTokens, temperature: req.temperature ?? 0.4 },
     };
+    if (req.model.requestFields) body.additionalModelRequestFields = req.model.requestFields;
     const started = Date.now();
     const data = (await this.post(req.region, `/model/${encodeURIComponent(req.model.modelId)}/converse`, body)) as ConverseResponse;
     const blocks = data.output?.message?.content ?? [];
@@ -102,6 +105,21 @@ export class BedrockRuntime implements LlmProvider, ImageProvider {
     const image = data.images?.[0];
     if (!image) throw new ProviderError('retryable', 200, 'Пустой ответ генератора изображений');
     return { base64: image, seed: data.seeds?.[0] ?? req.seed ?? 0, format: 'png' };
+  }
+
+  /** TwelveLabs Pegasus 1.5: видео → текст через InvokeModel (Converse не поддерживается). */
+  async analyzeVideo(req: VideoRequest): Promise<VideoResponse> {
+    if (!req.base64 && !req.s3) throw new ProviderError('bad_request', 0, 'Нужно видео: base64 (до 25 МБ) или ссылка S3');
+    const body: Record<string, unknown> = {
+      analysis_mode: 'general',
+      inputPrompt: req.prompt,
+      mediaSource: req.base64 ? { base64String: req.base64 } : { s3Location: req.s3 },
+      temperature: req.temperature ?? 0.2,
+      maxOutputTokens: Math.max(512, req.maxOutputTokens ?? 2048),
+    };
+    const data = (await this.post(req.region, `/model/${encodeURIComponent(req.model.modelId)}/invoke`, body)) as { message?: string; stopReason?: string };
+    if (typeof data.message !== 'string') throw new ProviderError('retryable', 200, 'Пустой ответ видеомодели');
+    return { text: data.message, stopReason: data.stopReason ?? 'stop' };
   }
 }
 
