@@ -76,7 +76,7 @@ export class BedrockRuntime implements LlmProvider, ImageProvider, VideoProvider
     const body: Record<string, unknown> = {
       system: [{ text: req.system }],
       messages,
-      inferenceConfig: { maxTokens: req.maxTokens, temperature: req.temperature ?? 0.4 },
+      inferenceConfig: req.model.noTemperature ? { maxTokens: req.maxTokens } : { maxTokens: req.maxTokens, temperature: req.temperature ?? 0.4 },
     };
     if (req.model.requestFields) body.additionalModelRequestFields = req.model.requestFields;
     const started = Date.now();
@@ -143,7 +143,7 @@ export function mapError(status: number, errorType: string, body: string): Provi
   if (status === 401) return new ProviderError('auth', status, message);
   if (status === 403) {
     // Нет доступа к конкретной модели — это недоступность модели, а не проблема ключа.
-    return /model|access to the model/i.test(body) ? new ProviderError('unavailable', status, message) : new ProviderError('auth', status, message);
+    return /model|access to the model|not available for this account/i.test(body) ? new ProviderError('unavailable', status, message) : new ProviderError('auth', status, message);
   }
   return new ProviderError('bad_request', status, message);
 }

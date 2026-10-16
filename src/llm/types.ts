@@ -25,6 +25,8 @@ export interface ModelEntry {
   price: { inputPer1M?: number; outputPer1M?: number; perImage?: number; perSecond?: number; confidence: 'high' | 'medium' | 'low' } | null;
   /** Поля модели для Converse additionalModelRequestFields (например, reasoning_effort). */
   requestFields?: Record<string, unknown>;
+  /** Модель отклоняет параметр temperature (Kimi K3) — не передавать его. */
+  noTemperature?: boolean;
   enabled: boolean;
   region?: string;
   lifecycle?: 'active' | 'legacy';

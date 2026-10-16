@@ -5,7 +5,8 @@
 import type { Store } from '../store/store.ts';
 import { truncate, type Clock } from '../core/util.ts';
 import type { Outbox, OutboxItem } from '../pipeline/outbox.ts';
-import type { Studio } from '../pipeline/studio.ts';
+import type { ProjectRunner } from '../pipeline/project.ts';
+import { isProjectId, type Studio } from '../pipeline/studio.ts';
 import type { Keyboard, TelegramApi, TgUpdate } from './api.ts';
 
 interface Session {
@@ -17,7 +18,8 @@ interface Session {
 
 const HELP = [
   'DRIVE&KAVA Studio — команды:',
-  '/new <задача> — новая задача для студии',
+  '/app — студия делает приложение целиком: концепция, ключевой экран, остальные экраны, показ',
+  '/new <задача> — отдельная задача (один экран)',
   '/status — что в работе',
   '/budget — расходы за день и месяц',
   '/history — последние решения',
@@ -135,7 +137,9 @@ export class OwnerBot {
     await this.store.put('tg-pending', pendingId, { text, ts: this.clock.now() });
     // Если версия ждёт решения, короткое сообщение чаще всего — правка к ней: одна кнопка.
     const waiting = (await this.studio.approvals()).filter((a) => a.status === 'pending').at(-1);
-    const ini = waiting ? await this.studio.get(waiting.initiativeId).catch(() => null) : null;
+    const ini = waiting
+      ? (isProjectId(waiting.initiativeId) ? await this.studio.projects?.get(waiting.initiativeId).catch(() => null) : await this.studio.get(waiting.initiativeId).catch(() => null)) ?? null
+      : null;
     const rows: Keyboard['inline_keyboard'] = [];
     if (waiting && ini) rows.push([{ text: `✏️ Это правка к «${truncate(ini.title, 28)}» v${waiting.version}`, callback_data: `q:${pendingId}:${waiting.id}` }]);
     rows.push([{ text: waiting ? 'Новая задача' : 'Создать задачу', callback_data: `n:${pendingId}:y` }, { text: 'Нет', callback_data: `n:${pendingId}:n` }]);
@@ -157,11 +161,22 @@ export class OwnerBot {
         }
         await this.createInitiative(arg);
         return;
+      case '/app': {
+        if (!this.studio.projects) return;
+        const { project, existing } = await this.studio.projects.start('owner');
+        if (existing) {
+          await this.api.sendMessage(this.chatId, `Приложение уже в работе: ${(await this.studio.projects.statusLines()).join(' ')}`);
+          return;
+        }
+        this.scheduler.schedule(project.id);
+        return;
+      }
       case '/status': {
-        const open = (await this.studio.list()).filter((i) => !['approved', 'rejected', 'declined'].includes(i.status));
+        const projectLines = (await this.studio.projects?.statusLines()) ?? [];
+        const open = (await this.studio.list()).filter((i) => !i.projectId && !['approved', 'rejected', 'declined'].includes(i.status));
         const list = open.length ? open.map((i) => `• ${i.title} — ${i.pauseKind === 'schedule' ? 'ждёт рабочих часов' : STATUS[i.status] ?? i.status}${i.version ? `, v${i.version}` : ''}${i.pauseReason && i.pauseKind !== 'schedule' ? ` (${truncate(i.pauseReason, 80)})` : ''}\n  ${i.id}`).join('\n') : 'Сейчас ничего не в работе.';
         const paused = this.scheduler.paused ? '\n⏸ Новая работа не запускается (/resume — снова запускать).' : '';
-        await this.api.sendMessage(this.chatId, `${list}${paused}${this.statusNote ? `\n\n${this.statusNote()}` : ''}`);
+        await this.api.sendMessage(this.chatId, `${projectLines.length ? projectLines.join('\n') + '\n' : ''}${list}${paused}${this.statusNote ? `\n\n${this.statusNote()}` : ''}`);
         return;
       }
       case '/budget': {
@@ -192,9 +207,11 @@ export class OwnerBot {
         if (!arg) {
           this.scheduler.paused = false;
           await this.store.put('control', 'studio', { paused: false, ts: this.clock.now() });
-          const paused = (await this.studio.list()).filter((i) => ['paused', 'running', 'failed'].includes(i.status));
+          const paused = (await this.studio.list()).filter((i) => !i.projectId && ['paused', 'running', 'failed'].includes(i.status));
+          const projects = ((await this.studio.projects?.list()) ?? []).filter((p) => ['paused', 'running'].includes(p.status));
+          for (const p of projects) this.scheduler.schedule(p.id);
           for (const i of paused) this.scheduler.schedule(i.id);
-          await this.api.sendMessage(this.chatId, `▶️ Работа возобновлена${paused.length ? `: ${paused.length} инициатив(ы) продолжаются` : ''}.`);
+          await this.api.sendMessage(this.chatId, `▶️ Работа возобновлена${projects.length ? ': приложение продолжается' : ''}${paused.length ? `${projects.length ? ', и ещё' : ':'} ${paused.length} задач(и)` : ''}.`);
           return;
         }
         this.scheduler.schedule(arg);
@@ -374,23 +391,25 @@ export function approvalKeyboard(approvalId: string): Keyboard {
   };
 }
 
-const STATUS: Record<string, string> = { running: 'в работе', awaiting_owner: 'ждёт вашего решения', paused: 'на паузе', blocked: 'не прошло внутренний контроль', failed: 'сбой', approved: 'утверждено', rejected: 'отклонено', declined: 'не задача студии' };
+const STATUS: Record<string, string> = { ready: 'готов, ждёт показа приложения', running: 'в работе', awaiting_owner: 'ждёт вашего решения', paused: 'на паузе', blocked: 'не прошло внутренний контроль', failed: 'сбой', approved: 'утверждено', rejected: 'отклонено', declined: 'не задача студии' };
 const DECISION: Record<string, string> = { approved: '✅', rejected: '❌', changes_requested: '✏️', superseded: '↪️' };
-const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', paused_schedule: 'пауза: нерабочее время', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии', senior_review: 'проверка старших', autonomy: 'студия взяла сама' };
+const EVENT: Record<string, string> = { created: 'создана', delivered: 'отправлена версия', changes_requested: 'правки', approved: 'одобрено', rejected: 'отклонено', paused_budget: 'пауза: бюджет', paused_models: 'пауза: модели', paused_schedule: 'пауза: нерабочее время', failed: 'сбой', blocked_quality_gate: 'остановлено контролем качества', duplicate_request: 'повторный запрос', declined: 'не задача студии', senior_review: 'проверка старших', autonomy: 'студия взяла сама', ready: 'экран готов', merged_into_project: 'вошло в приложение' };
 
 /** Очередь запусков: инициативы выполняются по одной, после каждой — доставка outbox. */
 export class RunQueue implements Scheduler {
   private studio: Studio;
   private outbox: Outbox;
+  private projects: ProjectRunner | null;
   private queue: string[] = [];
   private busy = false;
   paused = false;
   idle: Promise<void> = Promise.resolve();
   private resolveIdle: (() => void) | null = null;
 
-  constructor(studio: Studio, outbox: Outbox) {
+  constructor(studio: Studio, outbox: Outbox, projects: ProjectRunner | null = null) {
     this.studio = studio;
     this.outbox = outbox;
+    this.projects = projects;
   }
 
   /** Идёт работа или в очереди есть инициативы. */
@@ -413,7 +432,13 @@ export class RunQueue implements Scheduler {
       while (this.queue.length && !this.paused) {
         const id = this.queue.shift()!;
         try {
-          await this.studio.run(id);
+          if (isProjectId(id) && this.projects) {
+            await this.projects.run(id);
+          } else {
+            const ini = await this.studio.run(id);
+            // Экран проекта, продолженный отдельно (/resume <id>), — дальше ведёт проект.
+            if (ini.projectId && !this.queue.includes(ini.projectId)) this.queue.push(ini.projectId);
+          }
         } catch (err) {
           console.error(`[queue] ${id}: ${(err as Error).message}`);
         }

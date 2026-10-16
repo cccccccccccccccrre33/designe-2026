@@ -184,7 +184,7 @@ export class ModelRouter {
       }
       if (calls >= maxCalls) break;
     }
-    throw new ModelChainExhausted(req.taskClass, attempts.map((a) => ({ model: a.model, error: a.error ?? a.outcome })));
+    throw new ModelChainExhausted(req.taskClass, attempts.map((a) => ({ model: a.model, error: a.error ?? a.outcome, outcome: a.outcome })));
   }
 
   private registerFailure(key: string, kind: ProviderError['kind']): void {

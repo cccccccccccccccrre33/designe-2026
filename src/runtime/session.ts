@@ -85,7 +85,15 @@ export async function runSession(o: SessionOptions): Promise<SessionReport> {
 
   // Продолжить начатое: упавшее посреди шага и остановленное концом рабочего дня.
   if (!app.queue.paused) {
+    // Приложение целиком ведёт проект: он сам продолжает свои экраны.
+    for (const p of await app.projects.list()) {
+      if (p.status === 'running' || (p.status === 'paused' && p.pauseKind === 'schedule')) {
+        report.resumed.push(p.id);
+        app.queue.schedule(p.id);
+      }
+    }
     for (const ini of await app.studio.list()) {
+      if (ini.projectId) continue;
       if (ini.status === 'running' || (ini.status === 'paused' && ini.pauseKind === 'schedule')) {
         report.resumed.push(ini.id);
         app.queue.schedule(ini.id);
@@ -128,7 +136,7 @@ export async function runSession(o: SessionOptions): Promise<SessionReport> {
     if (clock.now() - idleSince < auto.idleMinutes * 60_000 || deadline - clock.now() < auto.minMinutesLeft * 60_000) return false;
     idleSince = clock.now(); // одна попытка на период простоя
     try {
-      const r = await autonomousTick({ studio: app.studio, store: app.store, ledger: app.ledger, outbox: app.outbox, clock, schedule: (id) => app.queue.schedule(id) }, auto, localDate(clock.now(), schedule.timezone));
+      const r = await autonomousTick({ studio: app.studio, projects: app.projects, store: app.store, ledger: app.ledger, outbox: app.outbox, clock, schedule: (id) => app.queue.schedule(id) }, auto, localDate(clock.now(), schedule.timezone));
       const line = 'started' in r ? `взята задача «${r.started.title}»` : `пропуск: ${r.skipped}`;
       if (report.autonomy.at(-1) !== line) report.autonomy.push(line);
       return 'started' in r;
@@ -196,9 +204,13 @@ export async function runSession(o: SessionOptions): Promise<SessionReport> {
 
   const s2 = await app.ledger.summary();
   report.budget = { daySpent: s2.day.spentUsd, dayLimit: s2.day.limitUsd, monthSpent: s2.month.spentUsd, monthLimit: s2.month.limitUsd };
-  report.initiatives = (await app.studio.list())
-    .filter((i) => !['approved', 'rejected', 'declined'].includes(i.status))
-    .map((i) => ({ id: i.id, title: i.title, status: i.pauseKind === 'schedule' ? 'paused:schedule' : i.status, version: i.version, waiting: i.status === 'awaiting_owner' }));
+  const project = app.projects.open(await app.projects.list());
+  report.initiatives = [
+    ...(project ? [{ id: project.id, title: `${project.title} (${project.screens.filter((s) => s.state === 'ready').length}/${project.screens.length || '?'} экранов)`, status: project.pauseKind === 'schedule' ? 'paused:schedule' : project.status, version: project.version, waiting: project.status === 'awaiting_owner' }] : []),
+    ...(await app.studio.list())
+    .filter((i) => !i.projectId && !['approved', 'rejected', 'declined'].includes(i.status))
+    .map((i) => ({ id: i.id, title: i.title, status: i.pauseKind === 'schedule' ? 'paused:schedule' : i.status, version: i.version, waiting: i.status === 'awaiting_owner' })),
+  ];
   return report;
 }
 

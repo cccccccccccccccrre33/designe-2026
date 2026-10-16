@@ -26,6 +26,7 @@ import { springFromDurationBounce } from '../science/spring.ts';
 import type { Store } from '../store/store.ts';
 import { StepJournal } from './engine.ts';
 import { nearestAspect, type ImageStudio } from './images.ts';
+import { PROJECT_SECTION, projectContext, type ProjectRunner } from './project.ts';
 import type { Outbox } from './outbox.ts';
 
 // Реальное место выдачи: фото и описание владельца (product/space).
@@ -34,7 +35,8 @@ const SPACE_PHOTO = 'product/space/drive-window-2026-10.jpg';
 const SPACE_TITLE = 'Реальное окно выдачи (фото и слова владельца)';
 const WINDOW_TAGS = new Set(['pickup', 'drive-window', 'payment', 'checkout', 'active-order', 'order-readiness', 'waiting']);
 
-export type InitiativeStatus = 'running' | 'awaiting_owner' | 'approved' | 'rejected' | 'paused' | 'blocked' | 'failed' | 'declined';
+/** ready — экран проекта готов и прошёл старших, ждёт показа всего приложения (без карточки владельцу). */
+export type InitiativeStatus = 'running' | 'awaiting_owner' | 'approved' | 'rejected' | 'paused' | 'blocked' | 'failed' | 'declined' | 'ready';
 
 export interface ChangeRequest {
   id: string;
@@ -63,6 +65,8 @@ export interface Initiative {
   /** false — запрос принят, но ещё не классифицирован (триаж доделает следующий запуск). */
   triaged?: boolean;
   pendingChanges?: ChangeRequest[];
+  /** Экран проекта «приложение целиком» (src/pipeline/project.ts): владельцу показывается проект, а не экран. */
+  projectId?: string;
   approvalId?: string;
   prNumber?: number;
   prUrl?: string;
@@ -168,6 +172,8 @@ export class Studio {
   crashBefore: string | null = null;
   /** Сессия в GitHub Actions: причина не начинать новых шагов (ночь, лимит времени). */
   stopCheck: (() => string | null) | null = null;
+  /** Проекты «приложение целиком»: решения по ним идут туда (ставится при сборке, src/app.ts). */
+  projects: ProjectRunner | null = null;
 
   constructor(deps: StudioDeps) {
     this.d = deps;
@@ -265,6 +271,13 @@ export class Studio {
         ini.pauseKind = 'schedule';
         ini.pauseReason = err.message;
         await this.event(ini, 'paused_schedule', err.message);
+      } else if (err instanceof BudgetExceeded && err.scope === 'day') {
+        // Дневной лимит: продолжить само в следующий день, без /resume.
+        ini.status = 'paused';
+        ini.pauseKind = 'schedule';
+        ini.pauseReason = err.message;
+        await this.event(ini, 'paused_budget', err.message);
+        await this.notifyText(`pause:day:${new Date(this.d.clock.now()).toISOString().slice(0, 10)}`, `⏸ Дневной лимит бюджета исчерпан — продолжу завтра с того же места.`);
       } else if (err instanceof BudgetExceeded) {
         ini.status = 'paused';
         ini.pauseKind = 'budget';
@@ -276,7 +289,7 @@ export class Studio {
         ini.pauseKind = 'models';
         ini.pauseReason = err.message;
         await this.event(ini, 'paused_models', JSON.stringify(err.details).slice(0, 300));
-        await this.notifyText(`pause:${ini.id}:${ini.round}:models`, `⏸ «${ini.title}» на паузе: ${err.message}. Модели недоступны или не включены в аккаунте. Продолжу после /resume ${ini.id}.`);
+        await this.notifyText(`pause:${ini.id}:${ini.round}:models`, `⏸ «${ini.title}» на паузе: ${explainChain(err)} Продолжу после /resume.`);
       } else {
         ini.status = 'failed';
         ini.pauseReason = (err as Error).message;
@@ -392,6 +405,28 @@ export class Studio {
 
   private async concludeRound(ini: Initiative, v: VariantResult, gate: GateResult, critiques: Critique[], ctx: { name: string; hypothesis: string; motion: MotionOut | null; changes?: ChangeRequest[]; selectionNotes: string[] }): Promise<void> {
     const j = this.journal(ini);
+    if (ini.projectId) {
+      // Экран проекта: без карточки владельцу. Готовый экран ждёт показа всего приложения.
+      if (!gate.passed) {
+        ini.status = 'blocked';
+        ini.pauseReason = gate.reasons.join('; ');
+        await this.event(ini, 'blocked_quality_gate', ini.pauseReason);
+        return;
+      }
+      await j.step(`ready:${ini.round}:a${ini.attempt ?? 0}`, async () => {
+        const version = ini.version + 1;
+        await this.d.store.put('delivered', `${ini.id}-v${version}`, v);
+        const strengths = critiques.flatMap((c) => c.variants.find((x) => x.variantId === v.id)?.strengths ?? []).slice(0, 3);
+        await this.d.store.put('screen-meta', `${ini.id}-v${version}`, { score: gate.score, strengths, name: ctx.name, hypothesis: ctx.hypothesis, motion: Boolean(ctx.motion), addressed: v.addressed ?? [], changes: ctx.changes ?? [] });
+        ini.version = version;
+        ini.status = 'ready';
+        ini.pendingChanges = undefined;
+        await this.event(ini, 'ready', `v${version}`);
+        return version;
+      });
+      Object.assign(ini, await this.get(ini.id));
+      return;
+    }
     if (!gate.passed) {
       ini.status = 'blocked';
       ini.pauseReason = gate.reasons.join('; ');
@@ -451,6 +486,7 @@ export class Studio {
         { label: 'STANDARD', title: 'Утверждённые решения по этому экрану', body: sameScreen.map((d) => `${d.title}: ${d.summary}`).join('\n') },
         { label: 'REJECTED', title: 'Отклонено владельцем раньше — не повторять', body: rejected.slice(-5).map((d) => `${d.title}: ${d.reason ?? 'без причины'}`).join('\n') },
         ...(space ? [{ label: 'STANDARD' as const, title: SPACE_TITLE, body: space }] : []),
+        ...(ini.projectId ? await projectContext(this.d.store, ini) : []),
         { label: 'RESEARCH', title: 'База знаний', body: formatForPrompt(knowledge) },
       ],
     };
@@ -540,10 +576,14 @@ export class Studio {
     if (!p) return null;
     const roleId = [ini.source === 'autonomous' ? p.autonomous : undefined, p.byType?.[ini.type], p.default].find((r): r is string => Boolean(r && this.d.roles.has(r)));
     if (!roleId) return null;
+    return { roleId, label: this.presenterLabel(roleId) };
+  }
+
+  /** «Директор студии (AI · школа: Сергей Мекрюков)»: роль работает в манере школы, но не выдаёт себя за человека. */
+  presenterLabel(roleId: string): string {
     const title = this.d.casting.review?.titles?.[roleId] ?? this.d.roles.get(roleId).title;
     const names = this.d.practitioners?.primaryNames(roleId) ?? [];
-    // Роль работает в манере школы, но не выдаёт себя за человека: подпись «(AI)».
-    return { roleId, label: `${title} (AI${names.length ? ` · школа: ${names.join(', ')}` : ''})` };
+    return `${title} (AI${names.length ? ` · школа: ${names.join(', ')}` : ''})`;
   }
 
   private async pitch(ini: Initiative, roleId: string, v: VariantResult, critiques: Critique[], ctx: { name: string; hypothesis: string; changes?: ChangeRequest[] }): Promise<PitchOut> {
@@ -673,7 +713,7 @@ export class Studio {
       },
       { label: 'WORK', title: 'Текущая спецификация', body: JSON.stringify(current.spec) },
       { label: 'STANDARD', title: 'Формат и дизайн-система', body: specGuide(this.d.tokens) },
-      ...sections.filter((s) => s.label === 'OWNER PREFERENCES' || s.label === 'REJECTED' || s.title === SPACE_TITLE),
+      ...sections.filter((s) => s.label === 'OWNER PREFERENCES' || s.label === 'REJECTED' || s.title === SPACE_TITLE || s.title.startsWith(PROJECT_SECTION)),
     ], { maxTokens: 7000, check: (v) => validateSpec((v as VariantOut).spec, this.d.tokens) });
     const used = this.knownSignatures(r.value.signaturesUsed);
     return this.materialize(ini, tag, { id: current.id, name: current.name, hypothesis: current.hypothesis, rationale: r.value.rationale, spec: r.value.spec, authorModel: r.model, authorFamily: r.family, addressed: r.value.addressed, signaturesUsed: used.length ? used : current.signaturesUsed });
@@ -812,6 +852,10 @@ export class Studio {
   async decide(approvalId: string, action: 'approve' | 'changes' | 'reject', opts: { feedback?: string; reason?: string } = {}): Promise<{ ok: boolean; message: string; initiative?: Initiative }> {
     const approval = await this.d.store.get<Approval>('approvals', approvalId);
     if (!approval) return { ok: false, message: 'Версия не найдена.' };
+    if (isProjectId(approval.initiativeId)) {
+      if (!this.projects) return { ok: false, message: 'Проекты не подключены.' };
+      return this.projects.decide(approvalId, action, opts);
+    }
     const ini = await this.get(approval.initiativeId);
     const target = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'changes_requested';
     // Повторный вход после сбоя посреди обработки того же решения разрешён.
@@ -887,7 +931,8 @@ export class Studio {
 
   // ───────────────────────── служебное ─────────────────────────
 
-  private async callAgent<T>(ini: Initiative, role: RoleProfile, taskClass: TaskClass, output: string, schema: Schema, sections: ContextSection[], opts: { maxTokens: number; images?: ImagePart[]; avoidFamily?: string; check?: (v: unknown) => string[]; reason?: string }): Promise<CompleteResult<T>> {
+  /** Вызов роли с её школой и схемой ответа. Нужен и проекту: ini — инициатива или запись проекта (id, source). */
+  async callAgent<T>(ini: Pick<Initiative, 'id' | 'source'>, role: RoleProfile, taskClass: TaskClass, output: string, schema: Schema, sections: ContextSection[], opts: { maxTokens: number; images?: ImagePart[]; avoidFamily?: string; check?: (v: unknown) => string[]; reason?: string }): Promise<CompleteResult<T>> {
     return this.d.router.complete<T>({
       taskClass, initiativeId: ini.id, role: role.id, autonomous: ini.source === 'autonomous',
       system: buildSystem(role, taskClass, output, schema, { school: this.d.practitioners?.schoolSection(role.id) }), user: buildUser(sections),
@@ -957,7 +1002,26 @@ export class Studio {
     return (await this.d.store.list<Initiative>('initiatives')).sort((a, b) => a.createdAt - b.createdAt);
   }
 
+  /** Экран проекта: инициатива без триажа (тип, экран и проблема — из концепции). Повторный вызов вернёт ту же. */
+  async createProjectScreen(projectId: string, source: Initiative['source'], s: { screen: string; title: string; problem: string; purpose: string; tags?: string[] }): Promise<Initiative> {
+    const id = `${projectId}-${s.screen}`;
+    const existing = await this.d.store.get<Initiative>('initiatives', id);
+    if (existing) return existing;
+    const now = this.d.clock.now();
+    const ini: Initiative = {
+      id, title: s.title, request: `${s.title}: ${s.purpose}`, source, status: 'running', type: 'new-screen', screen: s.screen, problem: s.problem,
+      tags: s.tags ?? [], round: 0, version: 0, attempt: 0, triaged: true, projectId, createdAt: now, updatedAt: now,
+      history: [{ ts: now, event: 'created', detail: `проект ${projectId}` }],
+    };
+    await this.save(ini);
+    return ini;
+  }
+
   async attachPr(initiativeId: string, prUrl: string, prNumber: number): Promise<void> {
+    if (isProjectId(initiativeId)) {
+      await this.projects?.attachPr(initiativeId, prUrl, prNumber);
+      return;
+    }
     const ini = await this.get(initiativeId);
     ini.prUrl = prUrl;
     ini.prNumber = prNumber;
@@ -990,6 +1054,20 @@ interface PitchOut { headline: string; story: string; question: string; referenc
 export interface AutonomyPlan { skip: boolean; reason?: string; title: string; request: string; why: string; references?: string[] }
 export interface MotionOut { transitions: Array<{ from: string; to: string; trigger: string; sharedElements?: string[]; spring: { duration: number; bounce: number }; choreography?: string }>; microinteractions?: Array<{ element: string; trigger: string; feedback: string }>; reducedMotion: string }
 interface FeedbackOut { intent: string; changes: ChangeRequest[]; preferenceCandidates: Array<{ statement: string; scope: string; strength: 'hard' | 'soft' }> }
+
+
+export const isProjectId = (id: string) => id.startsWith('prj-');
+
+/** Понятная владельцу причина: модели не открыты в аккаунте или ответили неверным форматом. */
+export function explainChain(err: ModelChainExhausted): string {
+  const attempts = ((err.details as { attempts?: Array<{ model: string; error: string; outcome?: string }> } | undefined)?.attempts ?? []);
+  const tried = attempts.filter((d) => d.outcome !== 'skipped');
+  const invalid = tried.filter((d) => d.outcome === 'invalid_json');
+  const short = tried.slice(0, 3).map((d) => `${d.model}: ${d.outcome === 'invalid_json' ? 'неверный формат ответа' : /not available|access|403|404/i.test(d.error) ? 'нет доступа' : truncate(d.error, 40)}`).join('; ');
+  return invalid.length
+    ? `модели ответили, но результат не прошёл проверку формата (${short}).`
+    : `модели недоступны (${short || 'ни одна не включена'}).`;
+}
 
 export function similarity(a: string, b: string): number {
   const x = new Set(tokenize(a));
