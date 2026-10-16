@@ -40,19 +40,19 @@ const base = { initiativeId: 'i', role: 'studio-director', autonomous: false, sy
 test('маршрутизатор: начинает с самой дешёвой модели класса', async () => {
   const { router, seen } = await setup(() => '{"ok":true}');
   const r = await router.complete<{ ok: boolean }>({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'gpt-5.6-luna');
-  assert.deepEqual(seen, ['gpt-5.6-luna']);
+  assert.equal(r.model, 'glm-4.7-flash');
+  assert.deepEqual(seen, ['glm-4.7-flash']);
 });
 
 test('маршрутизатор: недоступная модель → следующий кандидат и circuit breaker', async () => {
   const { router, seen } = await setup((req) => {
-    if (req.model.key === 'gpt-5.6-luna') throw new ProviderError('unavailable', 404, 'model not found');
+    if (req.model.key === 'glm-4.7-flash') throw new ProviderError('unavailable', 404, 'model not found');
     return '{"ok":true}';
   });
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'glm-4.7-flash');
+  assert.equal(r.model, 'nova-micro');
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['gpt-5.6-luna', 'glm-4.7-flash', 'glm-4.7-flash']); // вторая попытка уже без недоступной модели
+  assert.deepEqual(seen, ['glm-4.7-flash', 'nova-micro', 'nova-micro']); // вторая попытка уже без недоступной модели
 });
 
 test('маршрутизатор: временная ошибка — один повтор той же модели', async () => {
@@ -62,14 +62,14 @@ test('маршрутизатор: временная ошибка — один �
     return '{"ok":true}';
   });
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna']);
+  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash']);
 });
 
 test('маршрутизатор: невалидный JSON → одна попытка ремонта, затем другая модель', async () => {
-  const { router, seen } = await setup((req) => (req.model.key === 'gpt-5.6-luna' ? '{"ok":"да"}' : '{"ok":true}'));
+  const { router, seen } = await setup((req) => (req.model.key === 'glm-4.7-flash' ? '{"ok":"да"}' : '{"ok":true}'));
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'glm-4.7-flash');
-  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna', 'glm-4.7-flash']);
+  assert.equal(r.model, 'nova-micro');
+  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash', 'nova-micro']);
   assert.ok(r.attempts.some((a) => a.outcome === 'invalid_json'));
 });
 
@@ -127,6 +127,18 @@ test('Bedrock: поля модели (уровень рассуждения) у�
   assert.deepEqual(body.additionalModelRequestFields, { reasoning_effort: 'medium' });
 });
 
+test('Bedrock: Kimi K3 без temperature; «not available for this account» — модель недоступна, а не ключ', async () => {
+  let body: Record<string, unknown> = {};
+  const fake: typeof fetch = async (_url, init) => {
+    body = JSON.parse(String(init!.body));
+    return new Response(JSON.stringify({ output: { message: { content: [{ text: 'так' }] } }, usage: {} }), { status: 200 });
+  };
+  const b = new BedrockRuntime({ apiKey: 'k', fetchImpl: fake });
+  await b.chat({ model: { key: 'kimi-k3', modelId: 'us.moonshotai.kimi-k3', kind: 'text', family: 'moonshot', input: ['text'], price: null, enabled: true, noTemperature: true }, region: 'us-west-2', system: 's', user: 'u', maxTokens: 10 });
+  assert.deepEqual(body.inferenceConfig, { maxTokens: 10 });
+  assert.equal(mapError(403, 'AccessDeniedException', '{"message":"xai.grok-4.7 is not available for this account."}').kind, 'unavailable');
+});
+
 test('видео: Pegasus через InvokeModel, бюджет резервируется и списывается, большое видео не отправляется', async () => {
   let call: { url: string; body: Record<string, unknown> } | null = null;
   const fake: typeof fetch = async (url, init) => {
@@ -158,7 +170,7 @@ test('маршрутизатор: premium-арбитр только с прич�
   const { router } = await setup(() => '{"ok":true}');
   await assert.rejects(router.complete({ ...base, taskClass: 'arbiter' }), /причину/);
   const r = await router.complete({ ...base, taskClass: 'arbiter', reason: 'спор лидеров' });
-  assert.equal(r.model, 'grok-4.7');
+  assert.equal(r.model, 'kimi-k3');
 });
 
 test('Bedrock: формат запроса Converse и разбор ответа', async () => {

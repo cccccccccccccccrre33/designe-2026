@@ -34,11 +34,13 @@ async function makeApp(tg: FakeTelegram | null, clock: { now(): number }, provid
   });
 }
 
-test('сама: пустая очередь днём — директор студии берёт задачу, старшие проверяют, ведущий показывает, следующая ждёт решения', { skip: noChrome }, async () => {
+test('сама: приложение уже утверждено, очередь пустая днём — директор студии берёт задачу, старшие проверяют, ведущий показывает, следующая ждёт решения', { skip: noChrome }, async () => {
   const tg = new FakeTelegram();
   const clock = { t: Date.parse('2026-07-15T09:00:00Z'), now() { return this.t; } }; // 12:00 по Киеву
   const provider = new ScriptedProvider(criteria, { before: () => { clock.t += 20_000; } });
   const app = await makeApp(tg, clock, provider);
+  // Приложение целиком уже сделано и утверждено — дальше студия берёт отдельные улучшения.
+  await app.store.put('projects', 'prj-done', { id: 'prj-done', title: 'Приложение', source: 'owner', status: 'approved', screens: [], version: 1, round: 0, createdAt: 1, updatedAt: 1, history: [] });
   const report = await runSession({ app, schedule, clock, maxMs: 50 * 60_000, exitWhenIdle: true, sleep });
 
   assert.match(report.autonomy[0], /взята задача «/);

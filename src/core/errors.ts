@@ -23,7 +23,7 @@ export class BudgetExceeded extends StudioError {
 
 /** Все кандидаты для класса задачи исчерпаны. */
 export class ModelChainExhausted extends StudioError {
-  constructor(taskClass: string, attempts: Array<{ model: string; error: string }>) {
+  constructor(taskClass: string, attempts: Array<{ model: string; error: string; outcome?: string }>) {
     super('model_chain_exhausted', `Нет доступной модели для «${taskClass}»`, { attempts });
     this.name = 'ModelChainExhausted';
   }

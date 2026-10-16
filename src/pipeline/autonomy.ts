@@ -8,6 +8,7 @@ import { truncate, type Clock } from '../core/util.ts';
 import type { BudgetLedger } from '../budget/ledger.ts';
 import type { Store } from '../store/store.ts';
 import type { Outbox } from './outbox.ts';
+import type { ProjectRunner } from './project.ts';
 import type { Studio } from './studio.ts';
 
 export interface AutonomyPolicy {
@@ -17,6 +18,8 @@ export interface AutonomyPolicy {
 
 export interface AutonomyDeps {
   studio: Studio;
+  /** Проект «приложение целиком»: пока его нет, студия начинает с него. */
+  projects?: ProjectRunner | null;
   store: Store;
   ledger: BudgetLedger;
   outbox: Outbox;
@@ -39,6 +42,18 @@ export async function autonomousTick(d: AutonomyDeps, policy: AutonomyPolicy, da
   const control = await d.store.get<{ enabled: boolean }>('control', 'autonomy');
   if (control && !control.enabled) return { skipped: 'выключено владельцем (/auto off)' };
   if ((await d.ledger.level()) !== 'normal') return { skipped: 'бюджет не на нормальном уровне' };
+  if (d.projects) {
+    const all = await d.projects.list();
+    const current = d.projects.open(all);
+    if (current) return { skipped: `приложение в работе: «${current.title}»` };
+    if (!all.length) {
+      // Главная работа студии — приложение целиком (просьба владельца 16.10.2026): с него и начинаем.
+      // Это задача владельца, а не самостоятельная мелочь, — расход идёт в общий бюджет.
+      const { project } = await d.projects.start('owner');
+      d.schedule(project.id);
+      return { started: { id: project.id, title: project.title, why: 'приложение целиком: концепция, ключевой экран, остальные экраны, показ' } };
+    }
+  }
   const open = (await d.studio.list()).filter((i) => i.source === 'autonomous' && ['running', 'awaiting_owner', 'paused'].includes(i.status));
   if (open.length) return { skipped: `своя задача уже открыта: «${open[0].title}»` };
   const counter = (await d.store.get<DayCounter>('autonomy', day)) ?? { started: 0, proposals: 0 };

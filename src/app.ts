@@ -17,6 +17,7 @@ import type { ImageProvider, LlmProvider } from './llm/types.ts';
 import { PreferenceRegistry, RoleNotes } from './memory/memory.ts';
 import { ImageStudio } from './pipeline/images.ts';
 import { Outbox } from './pipeline/outbox.ts';
+import { ProjectRunner } from './pipeline/project.ts';
 import { Studio, type RendererLike } from './pipeline/studio.ts';
 import { ScreenRenderer } from './render/renderer.ts';
 import { FileStore, type Store } from './store/store.ts';
@@ -46,6 +47,7 @@ export interface App {
   ledger: BudgetLedger;
   router: ModelRouter;
   queue: RunQueue;
+  projects: ProjectRunner;
   bot: OwnerBot | null;
   telegram: TelegramApi | null;
   provider: LlmProvider;
@@ -100,7 +102,10 @@ export async function createApp(opts: AppOptions): Promise<App> {
     tokens: config.tokens, casting: config.casting, rubric: config.rubric, catalog: config.catalog, principles: config.principles,
     renderer, outbox, images: imageStudio, publishToGitHub: Boolean(ghCfg), practitioners,
   });
-  const queue = new RunQueue(studio, outbox);
+  const projects = new ProjectRunner(studio);
+  studio.projects = projects;
+  const queue = new RunQueue(studio, outbox, projects);
+  projects.schedule = (id) => queue.schedule(id);
 
   let telegram: TelegramApi | null = null;
   let bot: OwnerBot | null = null;
@@ -139,7 +144,7 @@ export async function createApp(opts: AppOptions): Promise<App> {
   }
 
   return {
-    config, store, studio, outbox, ledger, router, queue, bot, telegram, provider,
+    config, store, studio, outbox, ledger, router, queue, projects, bot, telegram, provider,
     async close() {
       await renderer.close?.();
     },

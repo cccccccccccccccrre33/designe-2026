@@ -154,6 +154,66 @@ export const feedbackSchema: Schema = {
   },
 };
 
+export const APP_SCREENS = ['home', 'catalog', 'drink-card', 'customizer', 'cart', 'order-active', 'pickup', 'profile', 'history', 'favorites', 'lab', 'onboarding'];
+
+/** Концепция приложения целиком: цель, визуальный язык, карта экранов (директор студии по позициям старших). */
+export const projectConceptSchema: Schema = {
+  type: 'object',
+  required: ['title', 'goal', 'principles', 'visual', 'flows', 'screens', 'anchor'],
+  properties: {
+    title: str('название концепции по-русски', 80),
+    goal: str('цель приложения одной-двумя фразами: для кого и что гость должен почувствовать и сделать'),
+    principles: strList('3–6 принципов продукта, проверяемых на экране', 3, 6),
+    visual: {
+      type: 'object', required: ['name', 'idea', 'palette', 'typography', 'motion', 'photo'],
+      properties: { name: str('имя визуального направления'), idea: str('художественная идея'), palette: str(), typography: str(), motion: str(), photo: str('как выглядят напитки в кадре') },
+    },
+    flows: strList('главные сценарии: от открытия до получения у окна', 1, 5),
+    screens: {
+      type: 'array', minItems: 3, maxItems: 9,
+      items: {
+        type: 'object', required: ['screen', 'title', 'purpose', 'problem'],
+        properties: {
+          screen: { type: 'string', enum: APP_SCREENS },
+          title: str('название экрана по-русски', 60),
+          purpose: str('зачем экран в сценарии'),
+          problem: str('проблема гостя, которую экран решает'),
+          tags: strList('теги: pickup, payment, motion, photo, waiting'),
+        },
+      },
+    },
+    anchor: { type: 'string', enum: APP_SCREENS, description: 'ключевой экран: его делают первым, он задаёт визуальный язык остальным' },
+  },
+};
+
+/** Подача всего приложения владельцу. */
+export const projectPitchSchema: Schema = {
+  type: 'object',
+  required: ['headline', 'story', 'question'],
+  properties: {
+    headline: str('заголовок, до 80 знаков', 80),
+    story: str('3–5 предложений: что команда сделала, ключевые решения, почему это уровень Drinkit/amo; без лести'),
+    question: str('один короткий вопрос владельцу'),
+    highlights: { type: 'array', maxItems: 6, items: { type: 'object', required: ['screen', 'note'], properties: { screen: str(), note: str('что сильного на этом экране, одна фраза') } } },
+  },
+};
+
+/** Правки владельца к приложению целиком: к какому экрану относится каждая. */
+export const projectFeedbackSchema: Schema = {
+  type: 'object',
+  required: ['changes', 'preferenceCandidates'],
+  properties: {
+    changes: {
+      type: 'array', minItems: 1, maxItems: 16,
+      items: { type: 'object', required: ['id', 'screen', 'target', 'request'], properties: { id: str('c1, c2…'), screen: str('id экрана из списка или all — ко всем экранам'), target: str('какой элемент'), request: str('что сделать, словами владельца') } },
+    },
+    preferenceCandidates: {
+      type: 'array', maxItems: 5,
+      items: { type: 'object', required: ['statement', 'scope', 'strength'], properties: { statement: str(), scope: str(), strength: { type: 'string', enum: ['hard', 'soft'] } } },
+    },
+  },
+};
+
 /** Следующая самостоятельная задача студии (директор студии, автономный режим). */
 export const autonomyPlanSchema: Schema = {
   type: 'object',

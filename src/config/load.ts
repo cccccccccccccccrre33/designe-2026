@@ -27,7 +27,7 @@ export interface Casting {
   review?: {
     seniors: string[];
     maxRounds: number;
-    presenter: { default: string; autonomous?: string; byType?: Record<string, string> };
+    presenter: { default: string; autonomous?: string; project?: string; byType?: Record<string, string> };
     titles?: Record<string, string>;
   };
 }
