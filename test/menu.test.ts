@@ -47,8 +47,8 @@ test('стандарт физики напитка находится поиск
 
 test('модели: фото-бриф пишут модели со зрением, а создают картинки и видео только генеративные модели', async () => {
   const c = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
-  // Grok и GPT-5.6 Luna не открыты для аккаунта (проверка 16.10.2026) — первым Kimi K3.
-  assert.equal(c.assignments.photo[0], 'kimi-k3');
+  // Рабочий список владельца от 17.10.2026: фото-бриф начинает Grok 4.7.
+  assert.equal(c.assignments.photo[0], 'grok-4.7');
   for (const key of c.assignments.photo) assert.ok(c.models.find((m) => m.key === key)!.input.includes('image'), `${key} должна видеть экран`);
   for (const key of [c.images.search, c.images.final]) assert.equal(c.models.find((m) => m.key === key)!.kind, 'image');
   const ray = c.models.find((m) => m.key === c.video?.generate)!;

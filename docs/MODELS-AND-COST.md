@@ -22,23 +22,22 @@
 Отправка Telegram, статусы, подсчёт стоимости, коммиты — **не** классы задач.
 Это код без LLM.
 
-## Модели по классам (выбор владельца, 15.10.2026)
+## Модели по классам (рабочий список владельца, 17.10.2026)
 
-Порядок — порядок попыток: первая отвечает, остальные — запасные. Цены за 1 млн
-токенов (вход / выход), из карточек моделей AWS; «≈» — цены нет в карточке, взята
-прежняя, сверить.
+Включены только: **Grok 4.7, Grok 4.6, GPT-5.6 Luna, Llama 4 Maverick, GLM 5.3, Qwen3 VL 235B, Nova Pro, DeepSeek V3.2**. Остальные текстовые модели (Kimi, MiniMax, GLM 4.7, Nova Micro, Claude, Pegasus) остались в реестре с `enabled: false`: вернуть можно одной строкой. Порядок — порядок попыток; GPT-5.6 Luna дёшева и стоит в большинстве классов запасной (умеренно), основной — на классификации и разборе.
 
 | Класс | Модели по порядку |
 |---|---|
-| classify, extract | GPT-5.6 Luna ($0.22 / $1.32) → GLM 4.7 Flash → Nova Micro |
-| position | MiniMax M2.5 ($0.30 / $1.20) → DeepSeek V3.2 ($0.62 / $1.85) → GLM 4.7 → GPT-5.6 Luna → Claude Haiku 4.5 |
-| brief, spec | GLM 5.3 ($1.85 / $5.81, рассуждение medium) → GLM 4.7 / MiniMax M2.5 → DeepSeek V3.2 → Claude Haiku 4.5 |
-| critique (с картинками) | Qwen3 VL 235B ($0.53 / $2.66) → Grok 4.6 ($2.20 / $6.60) → Kimi K3 ($3.30 / $16.50) → Nova 2 Lite → Llama 4 Maverick (≈) → Nova Pro (≈) → Kimi K2.5 → Claude Haiku 4.5 |
-| science | DeepSeek V3.2 → GLM 4.7 → MiniMax M2.5 |
-| arbiter | Grok 4.7 ($2.20 / $6.60) → Kimi K3 → Claude Sonnet 4.6 |
-| photo (фото-бриф и промпт, видят макет экрана) | Grok 4.7 → Grok 4.6 → GPT-5.6 Luna → Kimi K3 → Claude Haiku 4.5 |
-| создание фото | поиск — Stable Image Core ($0.04), финал — Stable Image Ultra ($0.14), альтернатива — SD 3.5 Large (≈ $0.08), правки — Stable Image Inpaint |
-| понимание видео | TwelveLabs Pegasus 1.5 (≈ $0.00049 за секунду видео + $7.50 за 1 млн токенов ответа) — команда `npm run studio -- analyze-video` |
+| classify, extract, dedupe | GPT-5.6 Luna ($0.22 / $1.32) → DeepSeek V3.2 |
+| position | DeepSeek V3.2 ($0.62 / $1.85) → GPT-5.6 Luna → GLM 5.3 |
+| brief | GLM 5.3 ($1.85 / $5.81, рассуждение medium) → DeepSeek V3.2 → GPT-5.6 Luna |
+| spec (макет экрана) | GLM 5.3 → DeepSeek V3.2 → GPT-5.6 Luna → Grok 4.6 |
+| critique (с картинками) | Qwen3 VL 235B ($0.53 / $2.66) → Grok 4.6 ($2.20 / $6.60) → Nova Pro (≈) → GPT-5.6 Luna → Llama 4 Maverick (≈) |
+| science | DeepSeek V3.2 → GLM 5.3 → GPT-5.6 Luna |
+| arbiter | Grok 4.7 ($2.20 / $6.60) → GLM 5.3 |
+| photo (фото-бриф и промпт, видят макет экрана) | Grok 4.7 → Grok 4.6 → GPT-5.6 Luna → Qwen3 VL 235B |
+| создание фото | поиск — Stable Image Core ($0.04), финал — Stable Image Ultra ($0.14), альтернатива — SD 3.5 Large (≈ $0.08), правки — Stable Image Inpaint (генераторов картинок в списке владельца нет — оставлены) |
+| проверка видео | Nova 2 Lite (смотрит ролик и отвечает текстом) и Marengo Embed 3.0 (вектора: похож ли кадр на эталонное фото напитка). Обе модели видео **не создают** |
 | создание видео | Luma Ray2 (`luma.ray-v2:0`) — выключена: работает только с сохранением в бакет S3 |
 
 Grok, GPT и Kimi картинки **не рисуют** — они видят экран, пишут сцену, свет, физику

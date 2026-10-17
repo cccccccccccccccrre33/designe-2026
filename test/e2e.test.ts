@@ -156,11 +156,11 @@ test('milestone: задача → v1 → правки → v2 → одобрен�
 });
 
 test('сбой: основная модель недоступна → работает следующая, результат доставлен', { skip }, async () => {
-  const r = await rig({ hooks: { before: (req) => { if (req.model.key === 'minimax-m2.5') throw new ProviderError('unavailable', 403, "You don't have access to the model"); } } });
+  const r = await rig({ hooks: { before: (req) => { if (req.model.key === 'deepseek-v3.2') throw new ProviderError('unavailable', 403, "You don't have access to the model"); } } });
   await send(r, update(1, OWNER, REQUEST));
   assert.equal((await r.app.studio.list())[0].status, 'awaiting_owner');
-  assert.ok(r.provider.calls.some((c) => c.model === 'deepseek-v3.2' && c.output === 'position'));
-  assert.ok(!r.provider.calls.some((c) => c.model === 'minimax-m2.5'));
+  assert.ok(r.provider.calls.some((c) => c.model === 'gpt-5.6-luna' && c.output === 'position'));
+  assert.ok(!r.provider.calls.some((c) => c.model === 'deepseek-v3.2'));
   await r.app.close();
 });
 
