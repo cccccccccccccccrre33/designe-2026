@@ -40,19 +40,30 @@ const base = { initiativeId: 'i', role: 'studio-director', autonomous: false, sy
 test('маршрутизатор: начинает с самой дешёвой модели класса', async () => {
   const { router, seen } = await setup(() => '{"ok":true}');
   const r = await router.complete<{ ok: boolean }>({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'glm-4.7-flash');
-  assert.deepEqual(seen, ['glm-4.7-flash']);
+  assert.equal(r.model, 'gpt-5.6-luna');
+  assert.deepEqual(seen, ['gpt-5.6-luna']);
+});
+
+test('реестр: включены только модели из рабочего списка владельца (плюс генераторы фото и модели понимания видео)', async () => {
+  const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
+  const allowed = new Set(['grok-4.7', 'grok-4.6', 'gpt-5.6-luna', 'llama-4-maverick', 'glm-5.3', 'qwen3-vl-235b', 'nova-pro', 'deepseek-v3.2', 'nova-2-lite']);
+  const enabledText = config.models.filter((m) => m.enabled && m.kind === 'text').map((m) => m.key);
+  assert.deepEqual(enabledText.filter((k) => !allowed.has(k)), []);
+  for (const keys of Object.values(config.assignments)) for (const k of keys) assert.ok(allowed.has(k) && k !== 'nova-2-lite', `в цепочках только текстовые модели из списка: ${k}`);
+  // Marengo и Nova 2 Lite видео не создают: генератора среди включённых моделей нет.
+  assert.ok(config.models.find((m) => m.key === 'marengo-embed-3.0'));
+  assert.ok(config.models.filter((m) => m.kind === 'video' && m.enabled).length === 0);
 });
 
 test('маршрутизатор: недоступная модель → следующий кандидат и circuit breaker', async () => {
   const { router, seen } = await setup((req) => {
-    if (req.model.key === 'glm-4.7-flash') throw new ProviderError('unavailable', 404, 'model not found');
+    if (req.model.key === 'gpt-5.6-luna') throw new ProviderError('unavailable', 404, 'model not found');
     return '{"ok":true}';
   });
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'nova-micro');
+  assert.equal(r.model, 'deepseek-v3.2');
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['glm-4.7-flash', 'nova-micro', 'nova-micro']); // вторая попытка уже без недоступной модели
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'deepseek-v3.2', 'deepseek-v3.2']); // вторая попытка уже без недоступной модели
 });
 
 test('маршрутизатор: временная ошибка — один повтор той же модели', async () => {
@@ -62,14 +73,14 @@ test('маршрутизатор: временная ошибка — один �
     return '{"ok":true}';
   });
   await router.complete({ ...base, taskClass: 'classify' });
-  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash']);
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna']);
 });
 
 test('маршрутизатор: невалидный JSON → одна попытка ремонта, затем другая модель', async () => {
-  const { router, seen } = await setup((req) => (req.model.key === 'glm-4.7-flash' ? '{"ok":"да"}' : '{"ok":true}'));
+  const { router, seen } = await setup((req) => (req.model.key === 'gpt-5.6-luna' ? '{"ok":"да"}' : '{"ok":true}'));
   const r = await router.complete({ ...base, taskClass: 'classify' });
-  assert.equal(r.model, 'nova-micro');
-  assert.deepEqual(seen, ['glm-4.7-flash', 'glm-4.7-flash', 'nova-micro']);
+  assert.equal(r.model, 'deepseek-v3.2');
+  assert.deepEqual(seen, ['gpt-5.6-luna', 'gpt-5.6-luna', 'deepseek-v3.2']);
   assert.ok(r.attempts.some((a) => a.outcome === 'invalid_json'));
 });
 
@@ -125,18 +136,18 @@ test('маршрутизатор: все модели упали → ModelChainE
 
 test('маршрутизатор: критик из другого семейства, чем автор', async () => {
   const { router } = await setup(() => '{"ok":true}');
-  const c = router.candidates({ taskClass: 'critique', system: 's', user: 'u', images: [{ format: 'png', base64: 'x' }], avoidFamily: 'moonshot' });
-  assert.notEqual(c.usable[0].family, 'moonshot');
+  const c = router.candidates({ taskClass: 'critique', system: 's', user: 'u', images: [{ format: 'png', base64: 'x' }], avoidFamily: 'qwen' });
+  assert.notEqual(c.usable[0].family, 'qwen');
   assert.ok(c.skipped.some((s) => s.reason.includes('семейство')));
 });
 
 test('маршрутизатор: модели без цены и без поддержки изображений пропускаются', async () => {
   const { router } = await setup(() => '{"ok":true}', undefined, (c) => {
-    c.models.find((m) => m.key === 'kimi-k3')!.price = null;
+    c.models.find((m) => m.key === 'grok-4.6')!.price = null;
     c.assignments.critique.unshift('deepseek-v3.2'); // текстовая модель без зрения в списке критики
   });
   const c = router.candidates({ taskClass: 'critique', system: 's', user: 'u', images: [{ format: 'png', base64: 'x' }] });
-  assert.ok(c.skipped.some((s) => s.key === 'kimi-k3' && s.reason.includes('цена')));
+  assert.ok(c.skipped.some((s) => s.key === 'grok-4.6' && s.reason.includes('цена')));
   assert.ok(c.skipped.some((s) => s.key === 'deepseek-v3.2' && s.reason.includes('изображения')));
   assert.ok(c.usable.every((m) => m.input.includes('image')));
 });
@@ -185,6 +196,7 @@ test('видео: Pegasus через InvokeModel, бюджет резервир�
   };
   const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
   const budget = JSON.parse(await readFile(join(REPO, 'studio/policies/budget.json'), 'utf8'));
+  config.models.find((m) => m.key === 'pegasus-1.5')!.enabled = true; // в реестре выключена (вне рабочего списка), контур проверяется отдельно
   const ledger = new BudgetLedger(new FileStore(await mkdtemp(join(tmpdir(), 'dk-v-'))), budget, { now: () => Date.now() });
   const studio = new VideoStudio({ provider: new BedrockRuntime({ apiKey: 'k', fetchImpl: fake }), config, ledger });
   const res = await studio.analyze({ initiativeId: 'v1', prompt: 'Что происходит у окна?', video: Buffer.from('видео'), seconds: 60 });
@@ -208,7 +220,7 @@ test('маршрутизатор: premium-арбитр только с прич�
   const { router } = await setup(() => '{"ok":true}');
   await assert.rejects(router.complete({ ...base, taskClass: 'arbiter' }), /причину/);
   const r = await router.complete({ ...base, taskClass: 'arbiter', reason: 'спор лидеров' });
-  assert.equal(r.model, 'kimi-k3');
+  assert.equal(r.model, 'grok-4.7');
 });
 
 test('Bedrock: формат запроса Converse и разбор ответа', async () => {
