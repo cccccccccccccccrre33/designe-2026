@@ -118,10 +118,11 @@ export class ModelRouter {
 
     for (const model of usable) {
       let retried = false;
-      let repair: { previous: string; errors: string[] } | undefined;
+      let repair: { previous: string; errors: string[]; truncated?: boolean } | undefined;
+      let tokenCap = Math.min(req.maxTokens, model.maxOutputTokens ?? req.maxTokens);
       while (calls < maxCalls) {
         calls++;
-        const estimate = this.estimateCost(model, req);
+        const estimate = this.estimateCost(model, { ...req, maxTokens: tokenCap });
         // BudgetExceeded пробрасывается наверх: дальше пробовать бессмысленно.
         const reservation = await this.ledger.reserve({
           initiativeId: req.initiativeId,
@@ -139,7 +140,7 @@ export class ModelRouter {
             system: req.system,
             user: req.user,
             images: req.images,
-            maxTokens: Math.min(req.maxTokens, model.maxOutputTokens ?? req.maxTokens),
+            maxTokens: tokenCap,
             temperature: req.temperature,
             repair,
           });
@@ -163,9 +164,14 @@ export class ModelRouter {
             attempts.push({ model: model.key, outcome: 'ok', costUsd: cost });
             return { value: parsed as T, model: model.key, family: model.family, costUsd: cost, usage: res.usage, attempts, raw };
           }
+          // Ответ оборван на лимите длины: JSON не закрыт, чинить нечего — просим короче и, если модель
+          // позволяет, даём больше места (рассуждение тоже считается в лимит выходных токенов).
+          const truncated = res.stopReason === 'max_tokens';
+          if (truncated) errors = [`ответ оборван на лимите ${tokenCap} токенов (модель выдала ${res.usage.outputTokens})`, ...errors];
           attempts.push({ model: model.key, outcome: 'invalid_json', error: errors.slice(0, 3).join('; '), costUsd: cost });
           if (repair) break; // ремонт уже был — следующая модель
-          repair = { previous: raw, errors };
+          if (truncated) tokenCap = Math.min(req.maxTokens * 2, model.maxOutputTokens ?? req.maxTokens * 2);
+          repair = { previous: truncated ? '' : raw, errors, truncated };
           continue;
         } catch (err) {
           if (err instanceof BudgetExceeded) throw err;

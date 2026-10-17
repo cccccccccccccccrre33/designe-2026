@@ -80,7 +80,7 @@ export interface ChatRequest {
   maxTokens: number;
   temperature?: number;
   /** Для повторной попытки ремонта JSON: предыдущий ответ ассистента и замечания. */
-  repair?: { previous: string; errors: string[] };
+  repair?: { previous: string; errors: string[]; /** Ответ оборван на лимите токенов: просим вернуть тот же JSON короче. */ truncated?: boolean };
 }
 
 export interface ChatResponse {

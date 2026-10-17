@@ -117,7 +117,7 @@ export function validateSpec(value: unknown, tokens: Tokens): string[] {
   if (typeof spec.id !== 'string' || !spec.id) errors.push('spec.id обязателен');
   if (typeof spec.screen !== 'string') errors.push('spec.screen обязателен');
   if (typeof spec.title !== 'string') errors.push('spec.title обязателен');
-  if (!resolveFill(tokens, spec.background)) errors.push(`spec.background: неизвестный токен «${spec.background}»`);
+  if (!resolveFill(tokens, spec.background)) errors.push(`spec.background: неизвестный токен «${spec.background}». Допустимо: color.{${Object.keys(tokens.color).join('|')}} или gradient.{${Object.keys(tokens.gradient).join('|')}}`);
   if (!Array.isArray(spec.nodes) || spec.nodes.length === 0) {
     errors.push('spec.nodes: нужен хотя бы один узел');
     return errors;
@@ -127,8 +127,10 @@ export function validateSpec(value: unknown, tokens: Tokens): string[] {
     if (ref === undefined || ref === 'none') return;
     const [group, name] = String(ref).split('.', 2);
     const table = (tokens as unknown as Record<string, Record<string, unknown>>)[group];
-    if (!groups.includes(group) || !table || table[name] === undefined) errors.push(`${path}: «${ref}» не токен (${groups.join('/')})`);
+    if (!groups.includes(group) || !table || table[name] === undefined) errors.push(`${path}: «${ref}» не токен. Допустимо: ${allowed(groups)}`);
   };
+  // Модель при ремонте видит точный список имён, а не только «не токен».
+  const allowed = (groups: string[]) => groups.map((g) => `${g}.{${Object.keys((tokens as unknown as Record<string, Record<string, unknown>>)[g] ?? {}).join('|')}}`).join(' или ');
   walk(spec.nodes, (node, parent) => {
     const path = `node ${node.id ?? '?'}`;
     if (typeof node.id !== 'string' || !node.id) errors.push('узел без id');

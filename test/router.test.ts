@@ -73,6 +73,44 @@ test('маршрутизатор: невалидный JSON → одна поп�
   assert.ok(r.attempts.some((a) => a.outcome === 'invalid_json'));
 });
 
+test('маршрутизатор: ответ оборван на лимите токенов → повтор с большим лимитом и просьбой «короче», без оборванного JSON', async () => {
+  const calls: Array<{ maxTokens: number; repair?: ChatRequest['repair'] }> = [];
+  const config = JSON.parse(await readFile(join(REPO, 'studio/policies/models.json'), 'utf8')) as ModelRegistryConfig;
+  config.retry.retryDelayMs = 1;
+  const budget = JSON.parse(await readFile(join(REPO, 'studio/policies/budget.json'), 'utf8'));
+  const store = new FileStore(await mkdtemp(join(tmpdir(), 'dk-t-')));
+  const clock = { now: () => Date.now() };
+  const provider: LlmProvider = {
+    async chat(req) {
+      calls.push({ maxTokens: req.maxTokens, repair: req.repair });
+      return calls.length === 1
+        ? { text: '{"ok": tru', usage: { inputTokens: 100, outputTokens: req.maxTokens }, stopReason: 'max_tokens', latencyMs: 1 }
+        : { text: '{"ok":true}', usage: { inputTokens: 100, outputTokens: 20 }, stopReason: 'end_turn', latencyMs: 1 };
+    },
+  };
+  const router = new ModelRouter({ config, provider, ledger: new BudgetLedger(store, budget, clock), store, clock });
+  const r = await router.complete<{ ok: boolean }>({ ...base, taskClass: 'position', maxTokens: 3000 });
+  assert.equal(r.value.ok, true);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].maxTokens, 3000);
+  assert.ok(calls[1].maxTokens > 3000, 'второй вызов получает больше места');
+  assert.equal(calls[1].repair?.truncated, true);
+  assert.equal(calls[1].repair?.previous, '', 'оборванный JSON обратно не отправляется');
+  assert.match(r.attempts.find((a) => a.outcome === 'invalid_json')!.error!, /оборван на лимите 3000/);
+});
+
+test('Bedrock: при обрыве ответа просьба «короче» добавляется к заданию, а не как реплика ассистента', async () => {
+  let body: { messages: Array<{ role: string; content: Array<{ text?: string }> }> } = { messages: [] };
+  const fake: typeof fetch = async (_url, init) => {
+    body = JSON.parse(String(init!.body));
+    return new Response(JSON.stringify({ output: { message: { content: [{ text: '{}' }] } }, usage: {} }), { status: 200 });
+  };
+  const b = new BedrockRuntime({ apiKey: 'k', fetchImpl: fake });
+  await b.chat({ model: { key: 'k', modelId: 'm', kind: 'text', family: 'f', input: ['text'], price: null, enabled: true }, region: 'us-west-2', system: 's', user: 'u', maxTokens: 10, repair: { previous: '', errors: ['обрыв'], truncated: true } });
+  assert.equal(body.messages.length, 1);
+  assert.match(body.messages[0].content.at(-1)!.text!, /оборвался на лимите/);
+});
+
 test('маршрутизатор: дополнительная проверка (check) работает как схема', async () => {
   let n = 0;
   const { router } = await setup(() => (n++ === 0 ? '{"ok":false}' : '{"ok":true}'));
