@@ -1064,8 +1064,10 @@ export function explainChain(err: ModelChainExhausted): string {
   const tried = attempts.filter((d) => d.outcome !== 'skipped');
   const invalid = tried.filter((d) => d.outcome === 'invalid_json');
   const short = tried.slice(0, 3).map((d) => `${d.model}: ${d.outcome === 'invalid_json' ? 'неверный формат ответа' : /not available|access|403|404/i.test(d.error) ? 'нет доступа' : truncate(d.error, 40)}`).join('; ');
+  // Конкретная причина (первая ошибка проверки), а не просто «неверный формат»: по ней видно, что чинить.
+  const why = [...new Set(invalid.map((d) => truncate(d.error.split('; ')[0], 140)))].slice(0, 2).join(' | ');
   return invalid.length
-    ? `модели ответили, но результат не прошёл проверку формата (${short}).`
+    ? `модели ответили, но результат не прошёл проверку формата (${short}). Причина: ${why}.`
     : `модели недоступны (${short || 'ни одна не включена'}).`;
 }
 

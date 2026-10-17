@@ -116,15 +116,17 @@
       "key": "claude-haiku-4.5", "modelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0", "kind": "text", "family": "anthropic", "tier": "main",
       "input": ["text", "image"], "contextTokens": 200000, "maxOutputTokens": 64000,
       "price": { "inputPer1M": 1.0, "outputPer1M": 5.0, "confidence": "high" },
-      "enabled": true, "lifecycle": "active",
-      "notes": "Последний резерв, если выбранные модели недоступны."
+      "enabled": false, "lifecycle": "active",
+      "notes": "Последний резерв, если выбранные модели недоступны.",
+      "notes": "17.10.2026: 404 «Model use case details have not been submitted for this account» — для моделей Anthropic в консоли Bedrock нужно один раз отправить форму с описанием сценария использования. Включить после этого и проверки check-models."
     },
     {
       "key": "claude-sonnet-4.6", "modelId": "us.anthropic.claude-sonnet-4-6", "kind": "text", "family": "anthropic", "tier": "premium",
       "input": ["text", "image"], "contextTokens": 1000000, "maxOutputTokens": 64000,
       "price": { "inputPer1M": 3.0, "outputPer1M": 15.0, "confidence": "high" },
-      "enabled": true, "lifecycle": "active",
-      "notes": "Последний резерв арбитра."
+      "enabled": false, "lifecycle": "active",
+      "notes": "Последний резерв арбитра.",
+      "notes": "17.10.2026: 404 «Model use case details have not been submitted for this account» — для моделей Anthropic в консоли Bedrock нужно один раз отправить форму с описанием сценария использования. Включить после этого и проверки check-models."
     },
     {
       "key": "pegasus-1.5", "modelId": "us.twelvelabs.pegasus-1-5-v1:0", "kind": "video", "family": "twelvelabs",
@@ -163,8 +165,8 @@
     "extract": ["glm-4.7-flash", "nova-micro", "claude-haiku-4.5"],
     "dedupe": ["glm-4.7-flash", "nova-micro"],
     "position": ["minimax-m2.5", "deepseek-v3.2", "glm-4.7", "claude-haiku-4.5"],
-    "brief": ["claude-sonnet-4.6", "minimax-m2.5", "deepseek-v3.2", "claude-haiku-4.5"],
-    "spec": ["claude-sonnet-4.6", "claude-haiku-4.5", "deepseek-v3.2", "minimax-m2.5", "glm-4.7"],
+    "brief": ["claude-sonnet-4.6", "glm-4.7", "minimax-m2.5", "deepseek-v3.2", "kimi-k2.5", "claude-haiku-4.5"],
+    "spec": ["claude-sonnet-4.6", "glm-4.7", "kimi-k2.5", "deepseek-v3.2", "minimax-m2.5", "kimi-k3", "claude-haiku-4.5"],
     "critique": ["qwen3-vl-235b", "kimi-k3", "nova-2-lite", "llama-4-maverick", "nova-pro", "kimi-k2.5", "claude-haiku-4.5"],
     "science": ["deepseek-v3.2", "glm-4.7", "minimax-m2.5"],
     "arbiter": ["kimi-k3", "claude-sonnet-4.6"],
@@ -179,7 +181,7 @@
     "critique": 0.7
   },
   "breaker": { "failures": 3, "cooldownMs": 600000 },
-  "retry": { "maxAttemptsPerCall": 6, "retryDelayMs": 2000 },
+  "retry": { "maxAttemptsPerCall": 10, "retryDelayMs": 2000 },
   "images": { "search": "stable-image-core", "final": "stable-image-ultra", "inpaint": "stable-image-inpaint" },
   "video": { "analyze": "pegasus-1.5", "generate": "luma-ray2" }
 }

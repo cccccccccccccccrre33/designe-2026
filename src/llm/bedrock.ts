@@ -66,7 +66,10 @@ export class BedrockRuntime implements LlmProvider, ImageProvider, VideoProvider
     }
     content.push({ text: req.user });
     const messages: unknown[] = [{ role: 'user', content }];
-    if (req.repair) {
+    if (req.repair?.truncated) {
+      // Оборванный JSON обратно не отправляем: он съедает бюджет токенов, который нужен на сам ответ.
+      content.push({ text: 'ВАЖНО: прошлый ответ оборвался на лимите длины. Верни ТОЛЬКО JSON и уложись в лимит: без блока рассуждений, без необязательных полей, без states и декоративных узлов, короткие тексты. Лучше проще, но целиком.' });
+    } else if (req.repair) {
       messages.push({ role: 'assistant', content: [{ text: req.repair.previous.slice(0, 20_000) }] });
       messages.push({
         role: 'user',
